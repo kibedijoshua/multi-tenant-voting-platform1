@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Session</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ff6b6b;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.connected {
+            background-color: #51cf66;
+        }
+        
+        .total-votes {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .candidates-container {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .candidate {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .candidate:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .candidate-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            gap: 20px;
+        }
+        
+        .candidate-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #e9ecef;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .candidate-photo:hover {
+            transform: scale(1.05);
+        }
+        
+        .candidate-content {
+            flex: 1;
+        }
+        
+        .candidate-details h3 {
+            font-size: 1.4rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .candidate-description {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .vote-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .vote-count {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #495057;
+        }
+        
+        .vote-percentage {
+            font-size: 1.1rem;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        
+        .vote-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .vote-btn {
+            background: linear-gradient(45deg, #51cf66, #40c057);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(81, 207, 102, 0.3);
+        }
+        
+        .vote-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(81, 207, 102, 0.4);
+        }
+        
+        .vote-btn:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .voted-indicator {
+            background: linear-gradient(45deg, #ffd43b, #fab005);
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 1.1rem;
+        }
+        
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .success {
+            background: #51cf66;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .candidate-info {
+                flex-direction: row;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .candidate-photo {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .vote-stats {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 id="sessionTitle">🗳️ Loading...</h1>
+        <p class="subtitle" id="sessionDescription">Please wait while we load the voting session</p>
+    </div>
+
+    <div class="status-bar">
+        <div class="connection-status">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="connectionText">Connecting...</span>
+        </div>
+        <div class="total-votes">
+            Total Votes: <span id="totalVotes">0</span>
+        </div>
+    </div>
+
+    <div id="messageContainer"></div>
+    
+    <div id="loadingMessage" class="loading">
+        🔄 Loading voting session...
+    </div>
+    
+    <div id="candidatesContainer" class="candidates-container" style="display: none;">
+        <!-- Candidates will be loaded here -->
+    </div>
+
+    <!-- Socket.IO Client -->
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <script>
+        class VotingInterface {
+            constructor() {
+                this.socket = null;
+                this.sessionId = this.getSessionIdFromUrl();
+                this.userSessionId = localStorage.getItem(`voting-session-${this.sessionId}`) || null;
+                this.hasVoted = false;
+                this.votedFor = null;
+                this.sessionData = null;
+                this.candidates = [];
+                
+                this.init();
+            }
+
+            getSessionIdFromUrl() {
+                const pathParts = window.location.pathname.split('/');
+                return pathParts[pathParts.length - 1];
+            }
+
+            init() {
+                this.setupSocketConnection();
+                this.loadVotingData();
+            }
+
+            setupSocketConnection() {
+                this.socket = io();
+                
+                this.socket.on('connect', () => {
+                    console.log('Connected to server');
+                    this.updateConnectionStatus(true);
+                    
+                    // Join the session room for real-time updates
+                    this.socket.emit('join-session', this.sessionId);
+                });
+                
+                this.socket.on('disconnect', () => {
+                    console.log('Disconnected from server');
+                    this.updateConnectionStatus(false);
+                });
+                
+                this.socket.on('vote-update', (data) => {
+                    console.log('Received vote update:', data);
+                    if (data.sessionId === this.sessionId) {
+                        this.updateCandidateStats(data.candidates, data.totalVotes);
+                    }
+                });
+                
+                this.socket.on('connect_error', (error) => {
+                    console.error('Connection error:', error);
+                    this.showMessage('Connection error. Please refresh the page.', 'error');
+                });
+            }
+
+            updateConnectionStatus(connected) {
+                const statusDot = document.getElementById('statusDot');
+                const connectionText = document.getElementById('connectionText');
+                
+                if (connected) {
+                    statusDot.classList.add('connected');
+                    connectionText.textContent = 'Connected';
+                } else {
+                    statusDot.classList.remove('connected');
+                    connectionText.textContent = 'Disconnected';
+                }
+            }
+
+            async loadVotingData() {
+                try {
+                    // Check vote status first
+                    const voteStatus = await this.fetchWithSession(`/api/voting/${this.sessionId}/vote-status`);
+                    this.userSessionId = voteStatus.sessionId;
+                    this.hasVoted = voteStatus.hasVoted;
+                    this.votedFor = voteStatus.votedFor;
+                    
+                    // Store user session ID
+                    localStorage.setItem(`voting-session-${this.sessionId}`, this.userSessionId);
+                    
+                    // Load session data and candidates
+                    const votingData = await this.fetchAPI(`/api/voting/${this.sessionId}`);
+                    this.sessionData = votingData.session;
+                    this.candidates = votingData.candidates;
+                    
+                    // Update page title and description
+                    document.getElementById('sessionTitle').textContent = `🗳️ ${this.sessionData.title}`;
+                    document.getElementById('sessionDescription').textContent = this.sessionData.description || 'Cast your vote and watch results update live!';
+                    
+                    this.renderCandidates();
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('candidatesContainer').style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Error loading voting data:', error);
+                    
+                    if (error.message.includes('404')) {
+                        this.showMessage('Voting session not found.', 'error');
+                    } else if (error.message.includes('403')) {
+                        this.showMessage('This voting session is not currently active.', 'error');
+                    } else {
+                        this.showMessage('Failed to load voting data. Please refresh the page.', 'error');
+                    }
+                }
+            }
+
+            async fetchAPI(url, options = {}) {
+                const response = await fetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            }
+
+            async fetchWithSession(url, options = {}) {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                };
+                
+                if (this.userSessionId) {
+                    headers['X-Session-ID'] = this.userSessionId;
+                }
+                
+                const response = await fetch(url, {
+                    ...options,
+                    headers
+                });
+                
+                // Update session ID if provided in response
+                const newSessionId = response.headers.get('X-Session-ID');
+                if (newSessionId) {
+                    this.userSessionId = newSessionId;
+                    localStorage.setItem(`voting-session-${this.sessionId}`, newSessionId);
+                }
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            }
+
+            renderCandidates() {
+                const container = document.getElementById('candidatesContainer');
+                const totalVotes = this.sessionData.totalVotes;
+                
+                document.getElementById('totalVotes').textContent = totalVotes;
+                
+                container.innerHTML = this.candidates.map(candidate => `
+                    <div class="candidate" data-id="${candidate.id}">
+                        <div class="candidate-info">
+                            <img src="${candidate.photo}" alt="${candidate.name}" class="candidate-photo" 
+                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(candidate.name)}&background=random&size=80'">
+                            <div class="candidate-content">
+                                <div class="candidate-details">
+                                    <h3>${candidate.name}</h3>
+                                    <div class="vote-stats">
+                                        <span class="vote-count">${candidate.votes}</span>
+                                        <span class="vote-percentage">${candidate.percentage}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${candidate.description ? `<div class="candidate-description">${candidate.description}</div>` : ''}
+                        
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${candidate.percentage}%"></div>
+                        </div>
+                        
+                        <div class="vote-actions">
+                            ${this.hasVoted ? (
+                                this.votedFor === candidate.id ? 
+                                    '<div class="voted-indicator">✓ Your Vote</div>' : 
+                                    '<button class="vote-btn" disabled>Vote</button>'
+                            ) : `<button class="vote-btn" onclick="votingInterface.vote('${candidate.id}')">Vote for ${candidate.name}</button>`}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateCandidateStats(candidates, totalVotes) {
+                document.getElementById('totalVotes').textContent = totalVotes;
+                
+                candidates.forEach(candidate => {
+                    const candidateElement = document.querySelector(`[data-id="${candidate.id}"]`);
+                    if (candidateElement) {
+                        const voteCount = candidateElement.querySelector('.vote-count');
+                        const percentage = candidateElement.querySelector('.vote-percentage');
+                        const progressFill = candidateElement.querySelector('.progress-fill');
+                        
+                        if (voteCount) voteCount.textContent = candidate.votes;
+                        if (percentage) percentage.textContent = `${candidate.percentage}%`;
+                        if (progressFill) progressFill.style.width = `${candidate.percentage}%`;
+                    }
+                });
+            }
+
+            async vote(candidateId) {
+                if (this.hasVoted) {
+                    this.showMessage('You have already voted!', 'error');
+                    return;
+                }
+
+                try {
+                    const result = await this.fetchWithSession(`/api/voting/${this.sessionId}/vote`, {
+                        method: 'POST',
+                        body: JSON.stringify({ candidateId })
+                    });
+
+                    this.hasVoted = true;
+                    this.votedFor = candidateId;
+                    
+                    const candidate = this.candidates.find(c => c.id === candidateId);
+                    this.showMessage(`✅ Vote recorded successfully for ${candidate ? candidate.name : 'candidate'}!`, 'success');
+                    
+                    // Re-render to show voted state
+                    this.renderCandidates();
+                    
+                } catch (error) {
+                    console.error('Error voting:', error);
+                    this.showMessage(`❌ ${error.message}`, 'error');
+                }
+            }
+
+            showMessage(message, type = 'info') {
+                const container = document.getElementById('messageContainer');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = type;
+                messageDiv.textContent = message;
+                
+                container.appendChild(messageDiv);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 5000);
+            }
+        }
+
+        // Initialize the voting interface when page loads
+        let votingInterface;
+        document.addEventListener('DOMContentLoaded', () => {
+            votingInterface = new VotingInterface();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Tenant Voting Platform - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #51cf66, #40c057);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(81, 207, 102, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(81, 207, 102, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .organization-list, .session-list {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-draft {
+            background: #ffd43b;
+            color: #333;
+        }
+        
+        .status-active {
+            background: #51cf66;
+            color: white;
+        }
+        
+        .status-completed {
+            background: #adb5bd;
+            color: white;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .message.success {
+            background: #51cf66;
+            color: white;
+        }
+        
+        .message.error {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .candidate-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .candidate-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .candidate-photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+        
+        .voting-url {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        
+        .url-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+            background: white;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .voting-link {
+            flex: 1;
+            color: #007bff;
+            text-decoration: none;
+            word-break: break-all;
+            font-size: 14px;
+        }
+        
+        .voting-link:hover {
+            text-decoration: underline;
+            color: #0056b3;
+        }
+        
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            min-width: 40px;
+        }
+        
+        .copy-btn:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+        
+        .copy-btn.copied {
+            background: #17a2b8;
+            animation: pulse 0.3s;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .security-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        .security-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .security-content {
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .suspicious-ip {
+            background: #ff6b6b;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .normal-ip {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .audit-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border-left: 4px solid #51cf66;
+        }
+        
+        .audit-item.warning {
+            border-left-color: #ffd43b;
+        }
+        
+        .audit-item.danger {
+            border-left-color: #ff6b6b;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗳️ Multi-Tenant Voting Platform</h1>
+            <p class="subtitle">Create and manage voting sessions for organizations</p>
+            <div style="margin-top: 15px;">
+                <a href="/find-voting" class="btn btn-secondary" style="text-decoration: none; display: inline-block;">🔍 Public Voting Finder</a>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('organizations')">Organizations</button>
+            <button class="tab" onclick="switchTab('sessions')">Voting Sessions</button>
+            <button class="tab" onclick="switchTab('create')">Create New</button>
+            <button class="tab" onclick="switchTab('security')">Security Monitor</button>
+        </div>
+
+        <div id="messageContainer"></div>
+
+        <!-- Organizations Tab -->
+        <div id="organizations" class="tab-content active">
+            <h2>Organizations</h2>
+            <div id="organizationList" class="organization-list">
+                <!-- Organizations will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Sessions Tab -->
+        <div id="sessions" class="tab-content">
+            <h2>Voting Sessions</h2>
+            <div class="form-group">
+                <label for="orgSelect">Select Organization:</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <select id="orgSelect" onchange="loadSessions()" style="flex: 1;">
+                        <option value="">Select an organization</option>
+                    </select>
+                    <button type="button" class="btn btn-secondary" onclick="adminDashboard.loadSessions()" title="Refresh sessions">
+                        🔄 Refresh
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="console.log('Current orgSelect value:', document.getElementById('orgSelect').value)" title="Debug dropdown value">
+                        🔍 Debug
+                    </button>
+                </div>
+            </div>
+            <div id="sessionList" class="session-list">
+                <!-- Sessions will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Create Tab -->
+        <div id="create" class="tab-content">
+            <h2>Create New</h2>
+            
+            <div class="tabs" style="margin-bottom: 20px;">
+                <button class="tab active" onclick="switchCreateTab('org')">Organization</button>
+                <button class="tab" onclick="switchCreateTab('session')">Voting Session</button>
+            </div>
+
+            <!-- Create Organization -->
+            <div id="createOrg" class="create-content">
+                <h3>Create New Organization</h3>
+                <form id="orgForm">
+                    <div class="form-group">
+                        <label for="orgName">Organization Name:</label>
+                        <input type="text" id="orgName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="orgDescription">Description:</label>
+                        <textarea id="orgDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminEmail">Admin Email:</label>
+                        <input type="email" id="adminEmail" required>
+                    </div>
+                    <button type="submit" class="btn">Create Organization</button>
+                </form>
+            </div>
+
+            <!-- Create Session -->
+            <div id="createSession" class="create-content" style="display: none;">
+                <h3>Create New Voting Session</h3>
+                <form id="sessionForm">
+                    <div class="form-group">
+                        <label for="sessionOrg">Organization:</label>
+                        <select id="sessionOrg" required>
+                            <option value="">Select an organization</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sessionTitle">Session Title:</label>
+                        <input type="text" id="sessionTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sessionDescription">Description:</label>
+                        <textarea id="sessionDescription" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn">Create Session</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Security Monitor Tab -->
+        <div id="security" class="tab-content">
+            <h2>Security Monitor</h2>
+            
+            <div class="security-dashboard">
+                <div class="security-card">
+                    <h3>🚨 Suspicious Activity</h3>
+                    <div id="suspiciousActivity" class="security-content">
+                        Loading...
+                    </div>
+                </div>
+                
+                <div class="security-card">
+                    <h3>📊 Vote Analysis</h3>
+                    <div class="form-group">
+                        <label for="securitySessionSelect">Select Session for Analysis:</label>
+                        <select id="securitySessionSelect" onchange="loadSecurityAudit()">
+                            <option value="">Select a session</option>
+                        </select>
+                    </div>
+                    <div id="securityAudit" class="security-content">
+                        Select a session to view security analysis
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session Management Modal -->
+    <div id="sessionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; max-width: 800px; width: 90%; max-height: 90%; overflow-y: auto;">
+            <h2 id="modalTitle">Manage Session</h2>
+            <div id="modalContent">
+                <!-- Content will be loaded here -->
+            </div>
+            <button onclick="closeModal()" class="btn btn-secondary" style="margin-top: 20px;">Close</button>
+        </div>
+    </div>
+
+    <script>
+        class AdminDashboard {
+            constructor() {
+                this.currentOrg = null;
+                this.currentSession = null;
+                this.init();
+            }
+
+            async init() {
+                await this.loadOrganizations();
+                this.setupEventListeners();
+                this.loadSecurityData();
+            }
+
+            setupEventListeners() {
+                document.getElementById('orgForm').addEventListener('submit', (e) => this.createOrganization(e));
+                document.getElementById('sessionForm').addEventListener('submit', (e) => this.createSession(e));
+            }
+
+            async loadOrganizations() {
+                try {
+                    console.log('🔍 Loading organizations...');
+                    const response = await fetch('/api/organizations');
+                    console.log('📡 Organizations response status:', response.status);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const organizations = await response.json();
+                    console.log('📋 Received organizations:', organizations);
+                    
+                    this.renderOrganizations(organizations);
+                    this.populateOrgSelects(organizations);
+                } catch (error) {
+                    console.error('❌ Error loading organizations:', error);
+                    this.showMessage('Failed to load organizations', 'error');
+                }
+            }
+
+            renderOrganizations(organizations) {
+                const container = document.getElementById('organizationList');
+                
+                if (organizations.length === 0) {
+                    container.innerHTML = '<p>No organizations found. Create one to get started!</p>';
+                    return;
+                }
+
+                container.innerHTML = organizations.map(org => `
+                    <div class="card">
+                        <h3>${org.name}</h3>
+                        <p>${org.description}</p>
+                        <p><strong>Admin:</strong> ${org.adminEmail}</p>
+                        <p><strong>Created:</strong> ${new Date(org.createdAt).toLocaleDateString()}</p>
+                        <button class="btn btn-secondary" onclick="adminDashboard.loadSessions('${org.id}')">
+                            View Sessions
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            populateOrgSelects(organizations) {
+                const selects = ['orgSelect', 'sessionOrg'];
+                
+                selects.forEach(selectId => {
+                    const select = document.getElementById(selectId);
+                    select.innerHTML = '<option value="">Select an organization</option>' +
+                        organizations.map(org => `<option value="${org.id}">${org.name}</option>`).join('');
+                });
+            }
+
+            async loadSessions(orgId = null) {
+                const selectedOrgId = orgId || document.getElementById('orgSelect').value;
+                
+                if (!selectedOrgId) {
+                    document.getElementById('sessionList').innerHTML = '<p>Please select an organization</p>';
+                    return;
+                }
+
+                // Show loading indicator
+                const container = document.getElementById('sessionList');
+                container.innerHTML = '<p>⏳ Loading sessions...</p>';
+
+                try {
+                    console.log('🔍 Loading sessions for organization:', selectedOrgId);
+                    const response = await fetch(`/api/sessions/${selectedOrgId}`);
+                    
+                    console.log('📡 Response status:', response.status);
+                    console.log('📡 Response ok:', response.ok);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const sessions = await response.json();
+                    console.log('📋 Received sessions:', sessions);
+                    
+                    this.renderSessions(sessions);
+                    
+                    if (orgId) {
+                        switchTab('sessions');
+                        document.getElementById('orgSelect').value = orgId;
+                    }
+                } catch (error) {
+                    console.error('❌ Error loading sessions:', error);
+                    console.error('❌ Error details:', {
+                        message: error.message,
+                        stack: error.stack,
+                        selectedOrgId: selectedOrgId
+                    });
+                    container.innerHTML = '<p>❌ Failed to load sessions. Please try again.</p>';
+                    this.showMessage(`Failed to load sessions: ${error.message}`, 'error');
+                }
+            }
+
+            renderSessions(sessions) {
+                const container = document.getElementById('sessionList');
+                
+                if (sessions.length === 0) {
+                    container.innerHTML = '<p>No voting sessions found for this organization.</p>';
+                    return;
+                }
+
+                container.innerHTML = sessions.map(session => this.renderSessionCard(session)).join('');
+            }
+
+            renderSessionCard(session) {
+                return `
+                    <div class="card" data-session-id="${session.id}">
+                        <h3>${session.title}</h3>
+                        <p>${session.description}</p>
+                        <p><strong>Status:</strong> <span class="status-badge status-${session.status}">${session.status}</span></p>
+                        <p><strong>Candidates:</strong> ${session.candidates.length}</p>
+                        <p><strong>Total Votes:</strong> ${session.totalVotes || 0}</p>
+                        <p><strong>Created:</strong> ${new Date(session.createdAt).toLocaleDateString()}</p>
+                        
+                        ${session.status === 'active' ? `
+                            <div class="voting-url">
+                                <div style="margin-bottom: 15px;">
+                                    <strong>📊 Standard Voting URL:</strong><br>
+                                    <div class="url-container">
+                                        <a href="${window.location.origin}/vote/${session.id}" target="_blank" class="voting-link">
+                                            ${window.location.origin}/vote/${session.id}
+                                        </a>
+                                        <button class="copy-btn" onclick="adminDashboard.copyToClipboard('${window.location.origin}/vote/${session.id}', this)" title="Copy to clipboard">
+                                            📋
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <strong>🔐 Enhanced Secure Voting URL:</strong><br>
+                                    <div class="url-container">
+                                        <a href="${window.location.origin}/secure-vote/${session.id}" target="_blank" class="voting-link">
+                                            ${window.location.origin}/secure-vote/${session.id}
+                                        </a>
+                                        <button class="copy-btn" onclick="adminDashboard.copyToClipboard('${window.location.origin}/secure-vote/${session.id}', this)" title="Copy to clipboard">
+                                            📋
+                                        </button>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                                    💡 <strong>Tip:</strong> Use the secure URL for public voting, standard URL for internal voting
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-secondary" onclick="adminDashboard.manageSession('${session.id}')">
+                                Manage Session
+                            </button>
+                            ${session.status === 'draft' ? `
+                                <button class="btn" onclick="adminDashboard.activateSession('${session.id}')">
+                                    Activate Session
+                                </button>
+                            ` : ''}
+                            ${session.status === 'active' ? `
+                                <button class="btn btn-danger" onclick="adminDashboard.completeSession('${session.id}')">
+                                    Complete Session
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            addSessionToUI(session) {
+                const container = document.getElementById('sessionList');
+                
+                // If container shows "no sessions" message, clear it first
+                if (container.innerHTML.includes('No voting sessions found')) {
+                    container.innerHTML = '';
+                }
+                
+                // Add the new session at the top with a subtle highlight animation
+                const sessionCard = document.createElement('div');
+                sessionCard.innerHTML = this.renderSessionCard(session);
+                sessionCard.firstElementChild.style.animation = 'slideInFromTop 0.3s ease-out';
+                
+                container.insertBefore(sessionCard.firstElementChild, container.firstChild);
+                
+                // Add some CSS for the animation if not already present
+                if (!document.querySelector('#sessionAnimation')) {
+                    const style = document.createElement('style');
+                    style.id = 'sessionAnimation';
+                    style.textContent = `
+                        @keyframes slideInFromTop {
+                            from {
+                                opacity: 0;
+                                transform: translateY(-20px);
+                            }
+                            to {
+                                opacity: 1;
+                                transform: translateY(0);
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+
+            async createOrganization(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('orgName').value,
+                    description: document.getElementById('orgDescription').value,
+                    adminEmail: document.getElementById('adminEmail').value
+                };
+
+                try {
+                    const response = await fetch('/api/organizations', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showMessage('Organization created successfully!', 'success');
+                        document.getElementById('orgForm').reset();
+                        await this.loadOrganizations();
+                    } else {
+                        this.showMessage(result.error, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error creating organization:', error);
+                    this.showMessage('Failed to create organization', 'error');
+                }
+            }
+
+            async createSession(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    organizationId: document.getElementById('sessionOrg').value,
+                    title: document.getElementById('sessionTitle').value,
+                    description: document.getElementById('sessionDescription').value
+                };
+
+                // Show loading state
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Creating Session...';
+                submitBtn.disabled = true;
+
+                try {
+                    const response = await fetch('/api/sessions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showMessage('Voting session created successfully!', 'success');
+                        document.getElementById('sessionForm').reset();
+                        
+                        // Optimistic UI update: Add the new session immediately to avoid full reload
+                        this.addSessionToUI(result.session);
+                        
+                        // Switch to sessions tab without full reload
+                        switchTab('sessions');
+                        document.getElementById('orgSelect').value = formData.organizationId;
+                    } else {
+                        this.showMessage(result.error, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error creating session:', error);
+                    this.showMessage('Failed to create session', 'error');
+                } finally {
+                    // Restore button state
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            }
+
+            async manageSession(sessionId) {
+                try {
+                    const response = await fetch(`/api/session/${sessionId}`);
+                    const session = await response.json();
+                    
+                    document.getElementById('modalTitle').textContent = `Manage: ${session.title}`;
+                    document.getElementById('modalContent').innerHTML = `
+                        <div style="margin-bottom: 20px;">
+                            <h3>Session Information</h3>
+                            <p><strong>Status:</strong> <span class="status-badge status-${session.status}">${session.status}</span></p>
+                            <p><strong>Total Votes:</strong> ${session.totalVotes || 0}</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <h3>Add Candidate</h3>
+                            <form id="candidateForm">
+                                <div class="form-group">
+                                    <label>Candidate Name:</label>
+                                    <input type="text" id="candidateName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Description:</label>
+                                    <textarea id="candidateDescription" rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Photo:</label>
+                                    <input type="file" id="candidatePhoto" accept="image/*">
+                                </div>
+                                <button type="submit" class="btn">Add Candidate</button>
+                            </form>
+                        </div>
+                        
+                        <div>
+                            <h3>Candidates (${session.candidates.length})</h3>
+                            <div class="candidate-grid">
+                                ${session.candidates.map(candidate => `
+                                    <div class="candidate-card">
+                                        <img src="${candidate.photo}" alt="${candidate.name}" class="candidate-photo">
+                                        <h4>${candidate.name}</h4>
+                                        <p>${candidate.description}</p>
+                                        <p><strong>Votes:</strong> ${candidate.votes || 0}</p>
+                                        <button class="btn btn-danger" onclick="adminDashboard.removeCandidate('${sessionId}', '${candidate.id}')">
+                                            Remove
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('sessionModal').style.display = 'block';
+                    
+                    // Setup candidate form
+                    document.getElementById('candidateForm').addEventListener('submit', (e) => {
+                        this.addCandidate(e, sessionId);
+                    });
+                    
+                } catch (error) {
+                    console.error('Error loading session:', error);
+                    this.showMessage('Failed to load session details', 'error');
+                }
+            }
+
+            async addCandidate(e, sessionId) {
+                e.preventDefault();
+                
+                const formData = new FormData();
+                formData.append('name', document.getElementById('candidateName').value);
+                formData.append('description', document.getElementById('candidateDescription').value);
+                
+                const photoFile = document.getElementById('candidatePhoto').files[0];
+                if (photoFile) {
+                    formData.append('photo', photoFile);
+                }
+
+                try {
+                    const response = await fetch(`/api/sessions/${sessionId}/candidates`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showMessage('Candidate added successfully!', 'success');
+                        this.manageSession(sessionId); // Refresh the modal
+                    } else {
+                        this.showMessage(result.error, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error adding candidate:', error);
+                    this.showMessage('Failed to add candidate', 'error');
+                }
+            }
+
+            async removeCandidate(sessionId, candidateId) {
+                if (!confirm('Are you sure you want to remove this candidate?')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/sessions/${sessionId}/candidates/${candidateId}`, {
+                        method: 'DELETE'
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showMessage('Candidate removed successfully!', 'success');
+                        this.manageSession(sessionId); // Refresh the modal
+                    } else {
+                        this.showMessage(result.error, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error removing candidate:', error);
+                    this.showMessage('Failed to remove candidate', 'error');
+                }
+            }
+
+            async activateSession(sessionId) {
+                await this.updateSessionStatus(sessionId, 'active');
+            }
+
+            async completeSession(sessionId) {
+                await this.updateSessionStatus(sessionId, 'completed');
+            }
+
+            async updateSessionStatus(sessionId, status) {
+                try {
+                    const response = await fetch(`/api/sessions/${sessionId}/status`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showMessage(`Session ${status} successfully!`, 'success');
+                        this.loadSessions(); // Refresh the session list
+                    } else {
+                        this.showMessage(result.error, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error updating session status:', error);
+                    this.showMessage('Failed to update session status', 'error');
+                }
+            }
+
+            showMessage(message, type) {
+                const container = document.getElementById('messageContainer');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                messageDiv.textContent = message;
+                
+                container.appendChild(messageDiv);
+                
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 5000);
+            }
+
+            async copyToClipboard(text, button) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    
+                    // Visual feedback
+                    const originalText = button.textContent;
+                    button.textContent = '✅';
+                    button.classList.add('copied');
+                    
+                    // Show success message
+                    this.showMessage('Voting URL copied to clipboard!', 'success');
+                    
+                    // Reset button after 2 seconds
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.classList.remove('copied');
+                    }, 2000);
+                    
+                } catch (err) {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    
+                    try {
+                        document.execCommand('copy');
+                        this.showMessage('Voting URL copied to clipboard!', 'success');
+                        
+                        // Visual feedback
+                        button.textContent = '✅';
+                        button.classList.add('copied');
+                        setTimeout(() => {
+                            button.textContent = '📋';
+                            button.classList.remove('copied');
+                        }, 2000);
+                        
+                    } catch (fallbackErr) {
+                        this.showMessage('Failed to copy URL. Please copy manually.', 'error');
+                        console.error('Copy failed:', fallbackErr);
+                    }
+                    
+                    document.body.removeChild(textArea);
+                }
+            }
+
+            // Security monitoring functions
+            async loadSecurityData() {
+                try {
+                    const response = await fetch('/api/security/suspicious-activity');
+                    const data = await response.json();
+                    this.renderSuspiciousActivity(data);
+                    
+                    // Load all sessions for security analysis
+                    await this.loadAllSessionsForSecurity();
+                } catch (error) {
+                    console.error('Error loading security data:', error);
+                }
+            }
+
+            async loadAllSessionsForSecurity() {
+                try {
+                    const orgResponse = await fetch('/api/organizations');
+                    const organizations = await orgResponse.json();
+                    
+                    const sessionSelect = document.getElementById('securitySessionSelect');
+                    sessionSelect.innerHTML = '<option value="">Select a session</option>';
+                    
+                    for (const org of organizations) {
+                        const sessionsResponse = await fetch(`/api/sessions/${org.id}`);
+                        const sessions = await sessionsResponse.json();
+                        
+                        sessions.forEach(session => {
+                            const option = document.createElement('option');
+                            option.value = session.id;
+                            option.textContent = `${org.name} - ${session.title}`;
+                            sessionSelect.appendChild(option);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error loading sessions for security:', error);
+                }
+            }
+
+            renderSuspiciousActivity(data) {
+                const container = document.getElementById('suspiciousActivity');
+                
+                if (data.suspiciousIPs.length === 0) {
+                    container.innerHTML = '<p style="color: #51cf66;">✅ No suspicious activity detected</p>';
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div style="margin-bottom: 15px;">
+                        <strong>Security Configuration:</strong><br>
+                        Max votes per IP: ${data.securityConfig.MAX_VOTES_PER_IP}<br>
+                        Rate limit: ${data.securityConfig.MAX_REQUESTS_PER_MINUTE} requests/min<br>
+                        Suspicious threshold: ${data.securityConfig.SUSPICIOUS_THRESHOLD} incidents
+                    </div>
+                    
+                    ${data.suspiciousIPs.map(item => `
+                        <div class="suspicious-ip">
+                            <strong>🚨 IP: ${item.ip}</strong><br>
+                            Incidents: ${item.count}<br>
+                            Last activity: ${new Date(item.lastActivity).toLocaleString()}<br>
+                            <details>
+                                <summary>View incidents</summary>
+                                ${item.activities.map(activity => `
+                                    <div style="margin: 5px 0; padding: 5px; background: rgba(255,255,255,0.2); border-radius: 3px;">
+                                        ${activity.activity} - ${new Date(activity.timestamp).toLocaleString()}
+                                    </div>
+                                `).join('')}
+                            </details>
+                        </div>
+                    `).join('')}
+                    
+                    ${data.allActivity.filter(a => a.count < data.securityConfig.SUSPICIOUS_THRESHOLD).length > 0 ? `
+                        <h4>Other Activity:</h4>
+                        ${data.allActivity.filter(a => a.count < data.securityConfig.SUSPICIOUS_THRESHOLD).map(item => `
+                            <div class="normal-ip">
+                                IP: ${item.ip} - ${item.count} incident(s)
+                            </div>
+                        `).join('')}
+                    ` : ''}
+                `;
+            }
+
+            async loadSecurityAudit() {
+                const sessionId = document.getElementById('securitySessionSelect').value;
+                if (!sessionId) {
+                    document.getElementById('securityAudit').innerHTML = 'Select a session to view security analysis';
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/security/audit/${sessionId}`);
+                    const audit = await response.json();
+                    this.renderSecurityAudit(audit);
+                } catch (error) {
+                    console.error('Error loading security audit:', error);
+                    document.getElementById('securityAudit').innerHTML = 'Error loading security audit';
+                }
+            }
+
+            renderSecurityAudit(audit) {
+                const container = document.getElementById('securityAudit');
+                
+                const hasIssues = audit.potentialIssues.duplicateIPs.length > 0 || 
+                                 audit.potentialIssues.excessiveVotes.length > 0;
+                
+                container.innerHTML = `
+                    <div class="audit-item">
+                        <strong>📊 Session Overview</strong><br>
+                        Total votes: ${audit.totalVotes}<br>
+                        Unique IPs: ${audit.ipVoteCounts.length}
+                    </div>
+                    
+                    ${hasIssues ? `
+                        <div class="audit-item danger">
+                            <strong>⚠️ Potential Issues Detected</strong><br>
+                            ${audit.potentialIssues.duplicateIPs.length > 0 ? `
+                                <strong>Multiple votes from same IP:</strong><br>
+                                ${audit.potentialIssues.duplicateIPs.map(ip => 
+                                    `${ip.ip}: ${ip.voteCount} votes`
+                                ).join('<br>')}<br>
+                            ` : ''}
+                            ${audit.potentialIssues.excessiveVotes.length > 0 ? `
+                                <strong>Excessive votes (≥${audit.potentialIssues.excessiveVotes[0]?.voteCount || 'N/A'}):</strong><br>
+                                ${audit.potentialIssues.excessiveVotes.map(ip => 
+                                    `${ip.ip}: ${ip.voteCount} votes`
+                                ).join('<br>')}
+                            ` : ''}
+                        </div>
+                    ` : `
+                        <div class="audit-item">
+                            <strong>✅ No Issues Detected</strong><br>
+                            All voting patterns appear normal
+                        </div>
+                    `}
+                    
+                    <div class="audit-item">
+                        <strong>📋 IP Vote Distribution</strong><br>
+                        ${audit.ipVoteCounts.map(ip => `
+                            <div style="margin: 2px 0;">
+                                ${ip.ip}: ${ip.voteCount} vote(s)
+                                ${ip.voteCount > 1 ? ' 🔍' : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="audit-item">
+                        <strong>🔒 Vote Details</strong><br>
+                        ${audit.voteDetails.map(vote => `
+                            <div style="margin: 2px 0; font-size: 0.9em;">
+                                Session: ${vote.userSessionId.substring(0, 8)}... | 
+                                IP: ${vote.ip} | 
+                                Candidate: ${vote.votedFor} | 
+                                Time: ${new Date(vote.timestamp).toLocaleString()}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        // Tab management
+        function switchTab(tabName) {
+            // Remove active class from all tabs and content
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to selected tab and content
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function switchCreateTab(tabType) {
+            const orgContent = document.getElementById('createOrg');
+            const sessionContent = document.getElementById('createSession');
+            const tabs = document.querySelectorAll('#create .tab');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (tabType === 'org') {
+                orgContent.style.display = 'block';
+                sessionContent.style.display = 'none';
+            } else {
+                orgContent.style.display = 'none';
+                sessionContent.style.display = 'block';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('sessionModal').style.display = 'none';
+        }
+
+        function loadSecurityAudit() {
+            if (adminDashboard) {
+                adminDashboard.loadSecurityAudit();
+            }
+        }
+
+        // Initialize dashboard
+        let adminDashboard;
+        document.addEventListener('DOMContentLoaded', () => {
+            adminDashboard = new AdminDashboard();
+        });
+    </script>
+</body>
+</html>

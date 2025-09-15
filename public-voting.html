@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Your Voting Session</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .search-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .search-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .method-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.3s ease;
+        }
+        
+        .method-card:hover {
+            border-color: #667eea;
+        }
+        
+        .method-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #51cf66, #40c057);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(81, 207, 102, 0.3);
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(81, 207, 102, 0.4);
+        }
+        
+        .sessions-list {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        .session-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .session-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background: #51cf66;
+            color: white;
+        }
+        
+        .status-completed {
+            background: #adb5bd;
+            color: white;
+        }
+        
+        .vote-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            margin-top: 15px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .message.error {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .message.info {
+            background: #339af0;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .search-methods {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗳️ Find Your Voting Session</h1>
+            <p class="subtitle">Locate and participate in active voting sessions</p>
+        </div>
+
+        <div class="search-section">
+            <div class="search-methods">
+                <!-- Method 1: Direct Session ID -->
+                <div class="method-card">
+                    <h3>🔗 Enter Session ID or URL</h3>
+                    <p style="color: #666; margin-bottom: 15px;">If you have a voting session ID or URL, enter it here:</p>
+                    <form id="sessionIdForm">
+                        <div class="form-group">
+                            <label for="sessionInput">Session ID or URL:</label>
+                            <input type="text" id="sessionInput" placeholder="e.g., abc123-def456 or full URL" required>
+                        </div>
+                        <button type="submit" class="btn">Go to Voting Session</button>
+                    </form>
+                </div>
+
+                <!-- Method 2: Browse by Organization -->
+                <div class="method-card">
+                    <h3>🏢 Browse by Organization</h3>
+                    <p style="color: #666; margin-bottom: 15px;">Find your organization and see active voting sessions:</p>
+                    <div class="form-group">
+                        <label for="orgSelect">Select Organization:</label>
+                        <select id="orgSelect">
+                            <option value="">Loading organizations...</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn" onclick="loadOrgSessions()">View Sessions</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="sessionsResults" class="sessions-list">
+            <h2>Active Voting Sessions</h2>
+            <div id="sessionsList">
+                <!-- Sessions will be loaded here -->
+            </div>
+        </div>
+
+        <div id="messageContainer"></div>
+    </div>
+
+    <script>
+        class PublicVotingFinder {
+            constructor() {
+                this.organizations = [];
+                this.init();
+            }
+
+            async init() {
+                await this.loadOrganizations();
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                document.getElementById('sessionIdForm').addEventListener('submit', (e) => this.handleSessionIdSubmit(e));
+            }
+
+            async loadOrganizations() {
+                try {
+                    const response = await fetch('/api/organizations');
+                    this.organizations = await response.json();
+                    this.populateOrganizationSelect();
+                } catch (error) {
+                    console.error('Error loading organizations:', error);
+                    this.showMessage('Failed to load organizations', 'error');
+                }
+            }
+
+            populateOrganizationSelect() {
+                const select = document.getElementById('orgSelect');
+                
+                if (this.organizations.length === 0) {
+                    select.innerHTML = '<option value="">No organizations available</option>';
+                    return;
+                }
+
+                select.innerHTML = '<option value="">Select an organization</option>' +
+                    this.organizations.map(org => `<option value="${org.id}">${org.name}</option>`).join('');
+            }
+
+            handleSessionIdSubmit(e) {
+                e.preventDefault();
+                const input = document.getElementById('sessionInput').value.trim();
+                
+                if (!input) {
+                    this.showMessage('Please enter a session ID or URL', 'error');
+                    return;
+                }
+
+                // Extract session ID from URL if full URL is provided
+                let sessionId = input;
+                if (input.includes('/vote/')) {
+                    const urlParts = input.split('/vote/');
+                    sessionId = urlParts[urlParts.length - 1];
+                }
+
+                // Navigate to voting session
+                window.location.href = `/vote/${sessionId}`;
+            }
+
+            async loadOrgSessions() {
+                const selectedOrgId = document.getElementById('orgSelect').value;
+                
+                if (!selectedOrgId) {
+                    this.showMessage('Please select an organization first', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/sessions/${selectedOrgId}`);
+                    const sessions = await response.json();
+                    
+                    this.displaySessions(sessions, selectedOrgId);
+                } catch (error) {
+                    console.error('Error loading sessions:', error);
+                    this.showMessage('Failed to load sessions', 'error');
+                }
+            }
+
+            displaySessions(sessions, orgId) {
+                const resultsDiv = document.getElementById('sessionsResults');
+                const sessionsList = document.getElementById('sessionsList');
+                
+                if (sessions.length === 0) {
+                    sessionsList.innerHTML = '<p>No voting sessions found for this organization.</p>';
+                    resultsDiv.style.display = 'block';
+                    return;
+                }
+
+                const org = this.organizations.find(o => o.id === orgId);
+                const orgName = org ? org.name : 'Unknown Organization';
+
+                // Filter only active sessions for public display
+                const activeSessions = sessions.filter(s => s.status === 'active');
+                
+                if (activeSessions.length === 0) {
+                    sessionsList.innerHTML = `<p>No active voting sessions found for ${orgName}.</p>`;
+                    resultsDiv.style.display = 'block';
+                    return;
+                }
+
+                sessionsList.innerHTML = `
+                    <div style="margin-bottom: 20px;">
+                        <h3>${orgName}</h3>
+                        <p>${activeSessions.length} active voting session(s)</p>
+                    </div>
+                    ${activeSessions.map(session => `
+                        <div class="session-card">
+                            <h4>${session.title}</h4>
+                            <p>${session.description || 'No description provided'}</p>
+                            <p><strong>Status:</strong> <span class="status-badge status-${session.status}">${session.status}</span></p>
+                            <p><strong>Candidates:</strong> ${session.candidates.length}</p>
+                            <p><strong>Total Votes:</strong> ${session.totalVotes || 0}</p>
+                            <p><strong>Created:</strong> ${new Date(session.createdAt).toLocaleDateString()}</p>
+                            
+                            <a href="/vote/${session.id}" class="btn vote-button">
+                                🗳️ Vote in This Session
+                            </a>
+                        </div>
+                    `).join('')}
+                `;
+                
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            showMessage(message, type) {
+                const container = document.getElementById('messageContainer');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                messageDiv.textContent = message;
+                
+                container.appendChild(messageDiv);
+                
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 5000);
+            }
+        }
+
+        // Global function for button onclick
+        function loadOrgSessions() {
+            if (window.votingFinder) {
+                window.votingFinder.loadOrgSessions();
+            }
+        }
+
+        // Initialize the finder
+        document.addEventListener('DOMContentLoaded', () => {
+            window.votingFinder = new PublicVotingFinder();
+        });
+    </script>
+</body>
+</html>

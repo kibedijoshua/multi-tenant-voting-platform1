@@ -1,0 +1,37 @@
+{
+  "name": "multi-tenant-voting-platform",
+  "version": "1.0.0",
+  "description": "A multi-tenant online voting platform with advanced security features",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "echo 'No build step required'"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "keywords": [
+    "voting",
+    "multi-tenant",
+    "real-time",
+    "websocket",
+    "express",
+    "election",
+    "democracy"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "multer": "^2.0.2",
+    "nodemailer": "^6.9.7",
+    "socket.io": "^4.8.1",
+    "sqlite3": "^5.1.6",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

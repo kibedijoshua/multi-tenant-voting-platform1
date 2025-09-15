@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Secure Voting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .security-banner {
+            background: linear-gradient(45deg, #51cf66, #40c057);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .security-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .security-feature {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .verification-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .captcha-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+        }
+        
+        .captcha-question {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .email-verification {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #2196f3;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #51cf66, #40c057);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(81, 207, 102, 0.3);
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(81, 207, 102, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .fraud-warning {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .fraud-score {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .score-high { border-left-color: #ff6b6b; }
+        .score-medium { border-left-color: #ffd43b; }
+        .score-low { border-left-color: #51cf66; }
+        
+        /* Copy existing vote.html styles for candidates */
+        .candidates-container {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .candidate {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .candidate:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .candidate-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            gap: 20px;
+        }
+        
+        .candidate-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #e9ecef;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .candidate-content {
+            flex: 1;
+        }
+        
+        .candidate-details h3 {
+            font-size: 1.4rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .candidate-description {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .vote-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .vote-count {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #495057;
+        }
+        
+        .vote-percentage {
+            font-size: 1.1rem;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .vote-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .vote-btn {
+            background: linear-gradient(45deg, #51cf66, #40c057);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(81, 207, 102, 0.3);
+        }
+        
+        .vote-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(81, 207, 102, 0.4);
+        }
+        
+        .vote-btn:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .voted-indicator {
+            background: linear-gradient(45deg, #ffd43b, #fab005);
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 id="sessionTitle">🔐 Enhanced Secure Voting</h1>
+        <p class="subtitle" id="sessionDescription">Advanced security protection against fraud</p>
+    </div>
+
+    <div class="security-banner">
+        🛡️ Advanced Security Features Active
+        <div class="security-features">
+            <div class="security-feature">✅ Rate Limiting</div>
+            <div class="security-feature">✅ IP Monitoring</div>
+            <div class="security-feature">✅ ML Fraud Detection</div>
+            <div class="security-feature">✅ CAPTCHA Protection</div>
+            <div class="security-feature">✅ Email Verification</div>
+            <div class="security-feature">✅ Browser Fingerprinting</div>
+        </div>
+    </div>
+
+    <div id="fraudScoreDisplay" class="fraud-score" style="display: none;">
+        <h3>🔍 Security Analysis</h3>
+        <div id="fraudScoreContent"></div>
+    </div>
+
+    <div id="messageContainer"></div>
+    
+    <div id="loadingMessage" class="loading">
+        🔄 Loading secure voting session...
+    </div>
+    
+    <div id="candidatesContainer" class="candidates-container" style="display: none;">
+        <!-- Candidates will be loaded here -->
+    </div>
+
+    <!-- Verification Modals -->
+    <div id="captchaModal" class="verification-modal">
+        <div class="modal-content">
+            <h3>🤖 Security Verification Required</h3>
+            <p>Please solve this simple math problem to continue:</p>
+            <div class="captcha-container">
+                <div id="captchaQuestion" class="captcha-question">Loading...</div>
+                <div class="form-group">
+                    <label for="captchaAnswer">Your Answer:</label>
+                    <input type="number" id="captchaAnswer" placeholder="Enter the answer">
+                </div>
+            </div>
+            <button onclick="submitCaptcha()" class="btn">Verify</button>
+            <button onclick="refreshCaptcha()" class="btn btn-secondary">New Question</button>
+            <button onclick="closeCaptchaModal()" class="btn" style="background: #adb5bd;">Cancel</button>
+        </div>
+    </div>
+
+    <div id="emailModal" class="verification-modal">
+        <div class="modal-content">
+            <h3>📧 Email Verification Required</h3>
+            <p>Please verify your email address to vote:</p>
+            <div class="email-verification">
+                <div class="form-group">
+                    <label for="verificationEmail">Email Address:</label>
+                    <input type="email" id="verificationEmail" placeholder="Enter your email">
+                </div>
+                <button onclick="requestEmailCode()" class="btn">Send Verification Code</button>
+                
+                <div id="emailCodeSection" style="display: none; margin-top: 15px;">
+                    <div class="form-group">
+                        <label for="emailCode">Verification Code:</label>
+                        <input type="text" id="emailCode" placeholder="Enter 6-digit code">
+                    </div>
+                    <button onclick="verifyEmailCode()" class="btn">Verify Code</button>
+                </div>
+            </div>
+            <button onclick="closeEmailModal()" class="btn" style="background: #adb5bd;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Socket.IO Client -->
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <script>
+        class EnhancedVotingInterface {
+            constructor() {
+                this.socket = null;
+                this.sessionId = this.getSessionIdFromUrl();
+                this.userSessionId = localStorage.getItem(`voting-session-${this.sessionId}`) || null;
+                this.hasVoted = false;
+                this.votedFor = null;
+                this.sessionData = null;
+                this.candidates = [];
+                this.currentVoteCandidate = null;
+                this.captchaToken = null;
+                this.emailVerified = false;
+                this.fraudScore = 0;
+                
+                this.init();
+            }
+
+            getSessionIdFromUrl() {
+                const pathParts = window.location.pathname.split('/');
+                return pathParts[pathParts.length - 1];
+            }
+
+            async init() {
+                this.setupSocketConnection();
+                await this.loadVotingData();
+                await this.loadFraudScore();
+            }
+
+            setupSocketConnection() {
+                this.socket = io();
+                
+                this.socket.on('connect', () => {
+                    console.log('Connected to server');
+                    this.socket.emit('join-session', this.sessionId);
+                });
+                
+                this.socket.on('vote-update', (data) => {
+                    if (data.sessionId === this.sessionId) {
+                        this.updateCandidateStats(data.candidates, data.totalVotes);
+                    }
+                });
+            }
+
+            async loadVotingData() {
+                try {
+                    const voteStatus = await this.fetchWithSession(`/api/voting/${this.sessionId}/vote-status`);
+                    this.userSessionId = voteStatus.sessionId;
+                    this.hasVoted = voteStatus.hasVoted;
+                    this.votedFor = voteStatus.votedFor;
+                    
+                    localStorage.setItem(`voting-session-${this.sessionId}`, this.userSessionId);
+                    
+                    const votingData = await this.fetchAPI(`/api/voting/${this.sessionId}`);
+                    this.sessionData = votingData.session;
+                    this.candidates = votingData.candidates;
+                    
+                    document.getElementById('sessionTitle').textContent = `🔐 ${this.sessionData.title}`;
+                    document.getElementById('sessionDescription').textContent = this.sessionData.description || 'Enhanced security protection against fraud';
+                    
+                    this.renderCandidates();
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('candidatesContainer').style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Error loading voting data:', error);
+                    this.showMessage(error.message, 'error');
+                }
+            }
+
+            async loadFraudScore() {
+                try {
+                    // Get user's IP (this would typically be done server-side)
+                    const response = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await response.json();
+                    const userIP = ipData.ip;
+                    
+                    const fraudResponse = await this.fetchAPI(`/api/security/fraud-score/${this.sessionId}/${userIP}`);
+                    this.fraudScore = fraudResponse.score;
+                    
+                    if (this.fraudScore > 0.1) {
+                        this.displayFraudScore(fraudResponse);
+                    }
+                } catch (error) {
+                    console.log('Could not load fraud score:', error);
+                }
+            }
+
+            displayFraudScore(fraudData) {
+                const display = document.getElementById('fraudScoreDisplay');
+                const content = document.getElementById('fraudScoreContent');
+                
+                content.innerHTML = `
+                    <div>
+                        <strong>Risk Level:</strong> 
+                        <span style="color: ${fraudData.risk === 'HIGH' ? '#ff6b6b' : fraudData.risk === 'MEDIUM' ? '#ffd43b' : '#51cf66'}">
+                            ${fraudData.risk}
+                        </span>
+                    </div>
+                    <div><strong>Fraud Score:</strong> ${(fraudData.score * 100).toFixed(1)}%</div>
+                    <div style="margin-top: 10px; font-size: 0.9em;">
+                        ${Object.entries(fraudData.factors).map(([key, value]) => 
+                            value ? `<div>⚠️ ${key.replace(/([A-Z])/g, ' $1').toLowerCase()}</div>` : ''
+                        ).join('')}
+                    </div>
+                `;
+                
+                display.className = `fraud-score score-${fraudData.risk.toLowerCase()}`;
+                display.style.display = 'block';
+            }
+
+            async vote(candidateId) {
+                if (this.hasVoted) {
+                    this.showMessage('You have already voted!', 'error');
+                    return;
+                }
+
+                this.currentVoteCandidate = candidateId;
+                
+                // Check if CAPTCHA or email verification is needed
+                const requiresCaptcha = this.fraudScore >= 0.3; // Lower threshold for demo
+                const requiresEmail = false; // Set based on SECURITY_CONFIG.EMAIL_VERIFICATION_REQUIRED
+                
+                if (requiresCaptcha) {
+                    await this.showCaptchaModal();
+                    return;
+                }
+                
+                if (requiresEmail && !this.emailVerified) {
+                    this.showEmailModal();
+                    return;
+                }
+                
+                await this.submitVote();
+            }
+
+            async showCaptchaModal() {
+                await this.refreshCaptcha();
+                document.getElementById('captchaModal').style.display = 'flex';
+            }
+
+            async refreshCaptcha() {
+                try {
+                    const response = await this.fetchAPI('/api/security/captcha');
+                    this.captchaToken = response.token;
+                    document.getElementById('captchaQuestion').textContent = response.question;
+                    document.getElementById('captchaAnswer').value = '';
+                } catch (error) {
+                    this.showMessage('Failed to load CAPTCHA', 'error');
+                }
+            }
+
+            showEmailModal() {
+                document.getElementById('emailModal').style.display = 'flex';
+            }
+
+            async requestEmailCode() {
+                const email = document.getElementById('verificationEmail').value;
+                if (!email) {
+                    this.showMessage('Please enter your email address', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await this.fetchAPI('/api/security/email-verification', {
+                        method: 'POST',
+                        body: JSON.stringify({ email, sessionId: this.sessionId })
+                    });
+                    
+                    this.showMessage('Verification code sent to your email!', 'success');
+                    document.getElementById('emailCodeSection').style.display = 'block';
+                } catch (error) {
+                    this.showMessage(`Failed to send verification code: ${error.message}`, 'error');
+                }
+            }
+
+            async verifyEmailCode() {
+                const email = document.getElementById('verificationEmail').value;
+                const code = document.getElementById('emailCode').value;
+                
+                if (!email || !code) {
+                    this.showMessage('Please enter both email and verification code', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await this.fetchAPI('/api/security/verify-email', {
+                        method: 'POST',
+                        body: JSON.stringify({ email, code })
+                    });
+                    
+                    this.emailVerified = true;
+                    this.showMessage('Email verified successfully!', 'success');
+                    this.closeEmailModal();
+                    await this.submitVote();
+                } catch (error) {
+                    this.showMessage(`Email verification failed: ${error.message}`, 'error');
+                }
+            }
+
+            async submitCaptcha() {
+                const answer = document.getElementById('captchaAnswer').value;
+                if (!answer) {
+                    this.showMessage('Please enter your answer', 'error');
+                    return;
+                }
+                
+                this.closeCaptchaModal();
+                await this.submitVote(answer);
+            }
+
+            async submitVote(captchaAnswer = null) {
+                try {
+                    const voteData = { candidateId: this.currentVoteCandidate };
+                    
+                    if (captchaAnswer && this.captchaToken) {
+                        voteData.captchaToken = this.captchaToken;
+                        voteData.captchaAnswer = captchaAnswer;
+                    }
+                    
+                    if (this.emailVerified) {
+                        voteData.email = document.getElementById('verificationEmail').value;
+                        voteData.emailCode = document.getElementById('emailCode').value;
+                    }
+
+                    const result = await this.fetchWithSession(`/api/voting/${this.sessionId}/vote`, {
+                        method: 'POST',
+                        body: JSON.stringify(voteData)
+                    });
+
+                    this.hasVoted = true;
+                    this.votedFor = this.currentVoteCandidate;
+                    
+                    const candidate = this.candidates.find(c => c.id === this.currentVoteCandidate);
+                    this.showMessage(`✅ Secure vote recorded for ${candidate.name}!`, 'success');
+                    
+                    // Show security info
+                    if (result.security) {
+                        this.showMessage(`Security: Risk Level ${result.security.riskLevel}, Fraud Score: ${(result.security.fraudScore * 100).toFixed(1)}%`, 'info');
+                    }
+                    
+                    this.renderCandidates();
+                    
+                } catch (error) {
+                    console.error('Error voting:', error);
+                    
+                    if (error.message.includes('CAPTCHA')) {
+                        await this.showCaptchaModal();
+                    } else if (error.message.includes('Email verification')) {
+                        this.showEmailModal();
+                    } else {
+                        this.showMessage(`❌ ${error.message}`, 'error');
+                    }
+                }
+            }
+
+            closeCaptchaModal() {
+                document.getElementById('captchaModal').style.display = 'none';
+            }
+
+            closeEmailModal() {
+                document.getElementById('emailModal').style.display = 'none';
+            }
+
+            // Copy methods from vote.html for rendering and API calls
+            async fetchAPI(url, options = {}) {
+                const response = await fetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            }
+
+            async fetchWithSession(url, options = {}) {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                };
+                
+                if (this.userSessionId) {
+                    headers['X-Session-ID'] = this.userSessionId;
+                }
+                
+                const response = await fetch(url, {
+                    ...options,
+                    headers
+                });
+                
+                const newSessionId = response.headers.get('X-Session-ID');
+                if (newSessionId) {
+                    this.userSessionId = newSessionId;
+                    localStorage.setItem(`voting-session-${this.sessionId}`, newSessionId);
+                }
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            }
+
+            renderCandidates() {
+                const container = document.getElementById('candidatesContainer');
+                const totalVotes = this.sessionData.totalVotes;
+                
+                container.innerHTML = this.candidates.map(candidate => `
+                    <div class="candidate" data-id="${candidate.id}">
+                        <div class="candidate-info">
+                            <img src="${candidate.photo}" alt="${candidate.name}" class="candidate-photo" 
+                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(candidate.name)}&background=random&size=80'">
+                            <div class="candidate-content">
+                                <div class="candidate-details">
+                                    <h3>${candidate.name}</h3>
+                                    <div class="vote-stats">
+                                        <span class="vote-count">${candidate.votes}</span>
+                                        <span class="vote-percentage">${candidate.percentage}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${candidate.description ? `<div class="candidate-description">${candidate.description}</div>` : ''}
+                        
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${candidate.percentage}%"></div>
+                        </div>
+                        
+                        <div class="vote-actions">
+                            ${this.hasVoted ? (
+                                this.votedFor === candidate.id ? 
+                                    '<div class="voted-indicator">✅ Your Secure Vote</div>' : 
+                                    '<button class="vote-btn" disabled>Vote</button>'
+                            ) : `<button class="vote-btn" onclick="enhancedVoting.vote('${candidate.id}')">🔐 Secure Vote</button>`}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateCandidateStats(candidates, totalVotes) {
+                candidates.forEach(candidate => {
+                    const candidateElement = document.querySelector(`[data-id="${candidate.id}"]`);
+                    if (candidateElement) {
+                        const voteCount = candidateElement.querySelector('.vote-count');
+                        const percentage = candidateElement.querySelector('.vote-percentage');
+                        const progressFill = candidateElement.querySelector('.progress-fill');
+                        
+                        if (voteCount) voteCount.textContent = candidate.votes;
+                        if (percentage) percentage.textContent = `${candidate.percentage}%`;
+                        if (progressFill) progressFill.style.width = `${candidate.percentage}%`;
+                    }
+                });
+            }
+
+            showMessage(message, type = 'info') {
+                const container = document.getElementById('messageContainer');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = type;
+                messageDiv.textContent = message;
+                
+                container.appendChild(messageDiv);
+                
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 5000);
+            }
+        }
+
+        // Global functions for modal interactions
+        let enhancedVoting;
+
+        function submitCaptcha() {
+            enhancedVoting.submitCaptcha();
+        }
+
+        function refreshCaptcha() {
+            enhancedVoting.refreshCaptcha();
+        }
+
+        function closeCaptchaModal() {
+            enhancedVoting.closeCaptchaModal();
+        }
+
+        function requestEmailCode() {
+            enhancedVoting.requestEmailCode();
+        }
+
+        function verifyEmailCode() {
+            enhancedVoting.verifyEmailCode();
+        }
+
+        function closeEmailModal() {
+            enhancedVoting.closeEmailModal();
+        }
+
+        // Initialize the enhanced voting interface
+        document.addEventListener('DOMContentLoaded', () => {
+            enhancedVoting = new EnhancedVotingInterface();
+        });
+    </script>
+</body>
+</html>
