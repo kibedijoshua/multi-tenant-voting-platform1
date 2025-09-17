@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Tenant Voting Platform - Admin Dashboard</title>
+    <title>VoteSphere - Enterprise Democracy Platform</title>
+    <link rel="icon" href="/logo.png" sizes="32x32">
+    <link rel="icon" href="/logo.png" sizes="96x96">
+    <link rel="icon" href="/logo.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="/logo.png" sizes="180x180">
     <style>
         * {
             margin: 0;
@@ -13,9 +17,22 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: url('/background.jpeg?v=1') center center fixed;
+            background-size: cover;
             min-height: 100vh;
             color: #333;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(59, 130, 246, 0.1);
+            z-index: -1;
         }
         
         .container {
@@ -31,6 +48,87 @@
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 50%, #2563eb 100%);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .logo-image {
+            width: 96px;
+            height: 96px;
+            object-fit: contain;
+            transition: all 0.4s ease;
+            animation: logoFloat 3s ease-in-out infinite;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        .logo-image:hover {
+            transform: translateY(-3px) scale(1.1);
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .logo-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+            line-height: 1;
+            margin: 0;
+        }
+
+        .logo-subtitle {
+            font-size: 14px;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.8;
+        }
+
+        .platform-badge {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 25px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            display: inline-block;
         }
         
         h1 {
@@ -41,6 +139,12 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            font-weight: 700;
+        }
+        
+        /* Legacy h1 support for backward compatibility */
+        .legacy-title {
+            display: none;
         }
         
         .subtitle {
@@ -56,18 +160,21 @@
             margin-bottom: 30px;
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
         }
         
         .tab {
             flex: 1;
-            padding: 15px 25px;
+            min-width: 120px;
+            padding: 15px 20px;
             background: transparent;
             border: none;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: #666;
             transition: all 0.3s ease;
+            text-align: center;
         }
         
         .tab.active {
@@ -131,8 +238,8 @@
         }
         
         .btn-secondary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
         }
         
         .btn-danger {
@@ -279,6 +386,70 @@
             100% { transform: scale(1); }
         }
         
+        /* Loading Spinner Styles */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .spinner-large {
+            width: 40px;
+            height: 40px;
+            border-width: 4px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .loading-text {
+            margin-left: 10px;
+        }
+        
+        /* Message container styling */
+        .message {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
         .security-dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -347,9 +518,16 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🗳️ Multi-Tenant Voting Platform</h1>
-            <p class="subtitle">Create and manage voting sessions for organizations</p>
-            <div style="margin-top: 15px;">
+            <div class="logo-container">
+                <img src="/logo.png" alt="VoteSphere Logo" class="logo-image">
+                <div class="logo-text">
+                    <h1 class="logo-title">VoteSphere</h1>
+                    <div class="logo-subtitle">Multi-Tenant Platform</div>
+                </div>
+            </div>
+            <div class="platform-badge">Enterprise Democracy Solution</div>
+            <p class="subtitle">Secure, scalable voting infrastructure for organizations worldwide</p>
+            <div style="margin-top: 20px;">
                 <a href="/find-voting" class="btn btn-secondary" style="text-decoration: none; display: inline-block;">🔍 Public Voting Finder</a>
             </div>
         </div>
@@ -358,6 +536,8 @@
             <button class="tab active" onclick="switchTab('organizations')">Organizations</button>
             <button class="tab" onclick="switchTab('sessions')">Voting Sessions</button>
             <button class="tab" onclick="switchTab('create')">Create New</button>
+            <button class="tab" onclick="switchTab('users')">User Management</button>
+            <button class="tab" onclick="switchTab('authentication')">Account Settings</button>
             <button class="tab" onclick="switchTab('security')">Security Monitor</button>
         </div>
 
@@ -377,19 +557,22 @@
             <div class="form-group">
                 <label for="orgSelect">Select Organization:</label>
                 <div style="display: flex; gap: 10px; align-items: center;">
-                    <select id="orgSelect" onchange="loadSessions()" style="flex: 1;">
-                        <option value="">Select an organization</option>
+                    <select id="orgSelect" onchange="debounceLoadSessions()" style="flex: 1;">
+                        <option value=""><span class="spinner"></span> Loading organizations...</option>
                     </select>
-                    <button type="button" class="btn btn-secondary" onclick="adminDashboard.loadSessions()" title="Refresh sessions">
+                    <button type="button" class="btn btn-secondary" onclick="adminDashboard.loadSessions(null, true)" title="Refresh sessions">
                         🔄 Refresh
                     </button>
-                    <button type="button" class="btn btn-secondary" onclick="console.log('Current orgSelect value:', document.getElementById('orgSelect').value)" title="Debug dropdown value">
+                    <button type="button" class="btn btn-secondary" onclick="console.log('Current orgSelect value:', document.getElementById('orgSelect').value); console.log('Admin dashboard instance:', adminDashboard)" title="Debug dropdown value">
                         🔍 Debug
                     </button>
                 </div>
             </div>
             <div id="sessionList" class="session-list">
-                <!-- Sessions will be loaded here -->
+                <div class="loading-container">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Welcome! Select an organization above to view voting sessions.</div>
+                </div>
             </div>
         </div>
 
@@ -445,6 +628,121 @@
             </div>
         </div>
 
+        <!-- User Management Tab -->
+        <div id="users" class="tab-content">
+            <h2>👥 User Management</h2>
+            
+            <div class="user-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold;" id="totalUsers">-</div>
+                    <div style="opacity: 0.9;">Total Users</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold;" id="activeAdmins">-</div>
+                    <div style="opacity: 0.9;">Active Admins</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold;" id="verifiedUsers">-</div>
+                    <div style="opacity: 0.9;">Verified Users</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold;" id="mfaUsers">-</div>
+                    <div style="opacity: 0.9;">MFA Enabled</div>
+                </div>
+            </div>
+            
+            <div class="user-controls" style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
+                <button class="btn" onclick="adminDashboard.loadUsers()" style="white-space: nowrap;">
+                    🔄 Refresh Users
+                </button>
+                <button class="btn btn-secondary" onclick="adminDashboard.showAddUserModal()" style="white-space: nowrap;">
+                    ➕ Add User
+                </button>
+                <input type="text" id="userSearchInput" placeholder="🔍 Search users..." style="flex: 1; min-width: 200px; margin: 0;" oninput="adminDashboard.filterUsers()">
+                <select id="roleFilter" onchange="adminDashboard.filterUsers()" style="min-width: 150px; margin: 0;">
+                    <option value="">All Roles</option>
+                    <option value="super_admin">Super Admin</option>
+                    <option value="org_admin">Org Admin</option>
+                    <option value="voter">Voter</option>
+                </select>
+            </div>
+            
+            <div id="userList" class="user-list">
+                <div class="loading-container">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Loading users...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Authentication Tab -->
+        <div id="authentication" class="tab-content">
+            <h2>🔐 Account Settings</h2>
+            
+            <div class="auth-sections" style="display: grid; gap: 30px;">
+                <!-- Current User Info -->
+                <div class="auth-section">
+                    <h3>👤 Your Account</h3>
+                    <div id="currentUserInfo" class="user-info-card" style="background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #3b82f6;">
+                        <div class="loading-container">
+                            <div class="spinner"></div>
+                            <div class="loading-text">Loading account information...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Change Password -->
+                <div class="auth-section">
+                    <h3>🔑 Change Password</h3>
+                    <form id="changePasswordForm" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmNewPassword">Confirm New Password</label>
+                            <input type="password" id="confirmNewPassword" required>
+                        </div>
+                        <button type="submit" class="btn">🔐 Update Password</button>
+                    </form>
+                </div>
+                
+                <!-- Two-Factor Authentication -->
+                <div class="auth-section">
+                    <h3>📱 Two-Factor Authentication (2FA)</h3>
+                    <div id="mfaSection" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <div class="loading-container">
+                            <div class="spinner"></div>
+                            <div class="loading-text">Loading MFA status...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Session Management -->
+                <div class="auth-section">
+                    <h3>🕒 Active Sessions</h3>
+                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <p style="color: #666; margin: 0;">Manage your active login sessions across devices</p>
+                            <button class="btn btn-danger" onclick="adminDashboard.logoutAllSessions()">
+                                🚪 Logout All Devices
+                            </button>
+                        </div>
+                        <div id="activeSessions">
+                            <div class="session-info" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 3px solid #28a745;">
+                                <div style="font-weight: 600;">🖥️ Current Session</div>
+                                <div style="font-size: 0.9rem; color: #666; margin-top: 5px;">This device • Last activity: Now</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Security Monitor Tab -->
         <div id="security" class="tab-content">
             <h2>Security Monitor</h2>
@@ -484,28 +782,130 @@
         </div>
     </div>
 
+    <!-- User Management Modal -->
+    <div id="userModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; max-width: 600px; width: 90%; max-height: 90%; overflow-y: auto;">
+            <h2 id="userModalTitle">Add User</h2>
+            <form id="userForm">
+                <div class="form-group">
+                    <label for="userUsername">Username</label>
+                    <input type="text" id="userUsername" required minlength="3">
+                </div>
+                
+                <div class="form-group">
+                    <label for="userEmail">Email Address</label>
+                    <input type="email" id="userEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="userPassword">Password</label>
+                    <input type="password" id="userPassword" required minlength="6">
+                    <small style="color: #666; font-size: 0.85rem;">Minimum 6 characters. User will receive an email verification.</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="userRole">Account Type</label>
+                    <select id="userRole" required>
+                        <option value="">Select role</option>
+                        <option value="voter">Voter - Participate in voting sessions</option>
+                        <option value="org_admin">Organization Admin - Manage voting sessions</option>
+                        <option value="super_admin" id="superAdminOption" style="display: none;">Super Admin - Full system access</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="userOrgGroup" style="display: none;">
+                    <label for="userOrganization">Organization</label>
+                    <select id="userOrganization">
+                        <option value="">Select organization</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 15px; margin-top: 25px;">
+                    <button type="submit" class="btn" id="userSubmitBtn">
+                        👍 Create User
+                    </button>
+                    <button type="button" onclick="closeUserModal()" class="btn btn-secondary">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         class AdminDashboard {
             constructor() {
                 this.currentOrg = null;
                 this.currentSession = null;
+                this.sessionsCache = new Map(); // Cache sessions by organization ID
+                this.loadingSessions = false;
+                this.requestQueue = new Map(); // Prevent duplicate requests
+                this.connectionPool = { active: 0, max: 6 }; // Limit concurrent requests
                 this.init();
             }
 
             async init() {
-                await this.loadOrganizations();
-                this.setupEventListeners();
-                this.loadSecurityData();
+                // Show loading state
+                this.showMessage('🚀 Loading platform...', 'info');
+                
+                try {
+                    // Load current user first (for authentication)
+                    await this.loadCurrentUser();
+                    
+                    // Load organizations first and wait for completion
+                    await this.loadOrganizations();
+                    
+                    // Setup event listeners after organizations are loaded
+                    this.setupEventListeners();
+                    
+                    // Load security data in background
+                    this.loadSecurityData();
+                    
+                    // Auto-select first organization if available and load its sessions
+                    const orgSelect = document.getElementById('orgSelect');
+                    if (orgSelect.children.length > 1) { // More than just the default option
+                        const firstOrgId = orgSelect.children[1].value;
+                        if (firstOrgId) {
+                            console.log('🚀 Auto-loading sessions for first organization:', firstOrgId);
+                            // Don't switch tabs automatically, just preload the data
+                            await this.loadSessions(firstOrgId, false, false); // Don't switch tab
+                        }
+                    }
+                    
+                    this.showMessage('✅ Platform loaded successfully!', 'success');
+                } catch (error) {
+                    console.error('Error initializing dashboard:', error);
+                    this.showMessage('Failed to initialize platform', 'error');
+                }
             }
 
             setupEventListeners() {
                 document.getElementById('orgForm').addEventListener('submit', (e) => this.createOrganization(e));
                 document.getElementById('sessionForm').addEventListener('submit', (e) => this.createSession(e));
+                
+                // Authentication event listeners
+                const changePasswordForm = document.getElementById('changePasswordForm');
+                if (changePasswordForm) {
+                    changePasswordForm.addEventListener('submit', (e) => this.handlePasswordChange(e));
+                }
             }
 
             async loadOrganizations() {
                 try {
                     console.log('🔍 Loading organizations...');
+                    
+                    // Show loading in organization list
+                    const orgContainer = document.getElementById('organizationList');
+                    if (orgContainer) {
+                        orgContainer.innerHTML = `
+                            <div style="text-align: center; padding: 40px; color: #666;">
+                                <div style="font-size: 24px; margin-bottom: 15px;">🏢</div>
+                                <div style="font-size: 18px; margin-bottom: 10px;">Loading Organizations...</div>
+                                <div style="font-size: 14px;">Setting up your voting platform</div>
+                            </div>
+                        `;
+                    }
+                    
                     const response = await fetch('/api/organizations');
                     console.log('📡 Organizations response status:', response.status);
                     
@@ -538,11 +938,19 @@
                         <p>${org.description}</p>
                         <p><strong>Admin:</strong> ${org.adminEmail}</p>
                         <p><strong>Created:</strong> ${new Date(org.createdAt).toLocaleDateString()}</p>
-                        <button class="btn btn-secondary" onclick="adminDashboard.loadSessions('${org.id}')">
+                        <button class="btn btn-secondary" onclick="adminDashboard.viewSessionsWithFeedback('${org.id}', this)">
                             View Sessions
                         </button>
                     </div>
                 `).join('');
+                
+                // PRELOAD STRATEGY: Quietly preload first organization's sessions in background
+                if (organizations.length > 0 && !this.sessionsCache.has(organizations[0].id)) {
+                    console.log('🚀 PRELOADING: Background loading sessions for first org:', organizations[0].name);
+                    this.loadSessions(organizations[0].id, false, false).catch(err => {
+                        console.log('Preload failed (not critical):', err.message);
+                    });
+                }
             }
 
             populateOrgSelects(organizations) {
@@ -550,12 +958,118 @@
                 
                 selects.forEach(selectId => {
                     const select = document.getElementById(selectId);
-                    select.innerHTML = '<option value="">Select an organization</option>' +
-                        organizations.map(org => `<option value="${org.id}">${org.name}</option>`).join('');
+                    if (organizations.length === 0) {
+                        select.innerHTML = '<option value="">No organizations found - Create one first!</option>';
+                    } else {
+                        select.innerHTML = '<option value="">Select an organization</option>' +
+                            organizations.map(org => `<option value="${org.id}">${org.name}</option>`).join('');
+                        
+                        // If this is the main org select and we're on sessions tab, show a helpful message
+                        if (selectId === 'orgSelect') {
+                            const sessionList = document.getElementById('sessionList');
+                            if (sessionList && (sessionList.innerHTML.includes('Welcome!') || sessionList.innerHTML.includes('loading-container'))) {
+                                sessionList.innerHTML = '<div class="loading-container"><div class="spinner"></div><div class="loading-text">🎉 Organizations loaded! Select an organization above to view voting sessions.</div></div>';
+                            }
+                        }
+                    }
                 });
+                
+                console.log(`⚙️ Populated organization dropdowns with ${organizations.length} organizations`);
             }
 
-            async loadSessions(orgId = null) {
+            // Optimized method for "View Sessions" button with instant feedback
+            async viewSessionsWithFeedback(orgId, buttonElement) {
+                // 1. INSTANT FEEDBACK - Change button immediately
+                const originalHTML = buttonElement.innerHTML;
+                buttonElement.innerHTML = '⏳ Loading...';
+                buttonElement.disabled = true;
+                buttonElement.style.opacity = '0.7';
+                
+                // 2. IMMEDIATE TAB SWITCH - Don't wait for data
+                window.switchTab('sessions');
+                document.getElementById('orgSelect').value = orgId;
+                
+                // 3. SHOW LOADING IN SESSIONS AREA INSTANTLY
+                const container = document.getElementById('sessionList');
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <div style="font-size: 24px; margin-bottom: 15px;">⏳</div>
+                        <div style="font-size: 18px; margin-bottom: 10px;">Loading Sessions...</div>
+                        <div style="font-size: 14px;">Please wait while we fetch the voting sessions</div>
+                        <div style="margin-top: 20px;">
+                            <div style="display: inline-block; width: 200px; height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden;">
+                                <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #007bff 0%, #007bff 50%, transparent 50%, transparent 100%); background-size: 20px 100%; animation: loading-bar 1s infinite linear;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // 4. ADD PROGRESS BAR ANIMATION CSS
+                if (!document.querySelector('#loadingBarStyle')) {
+                    const style = document.createElement('style');
+                    style.id = 'loadingBarStyle';
+                    style.textContent = `
+                        @keyframes loading-bar {
+                            0% { transform: translateX(-100%); }
+                            100% { transform: translateX(100%); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                try {
+                    // 5. LOAD DATA IN BACKGROUND
+                    await this.loadSessions(orgId, false, false); // Don't switch tab again
+                    
+                    // 6. SUCCESS FEEDBACK
+                    this.showMessage('✅ Sessions loaded successfully!', 'success');
+                    
+                } catch (error) {
+                    // 7. ERROR HANDLING
+                    console.error('Error in viewSessionsWithFeedback:', error);
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #dc3545;">
+                            <div style="font-size: 24px; margin-bottom: 15px;">❌</div>
+                            <div style="font-size: 18px; margin-bottom: 10px;">Failed to Load Sessions</div>
+                            <div style="font-size: 14px; margin-bottom: 20px;">There was an error loading the voting sessions</div>
+                            <button class="btn btn-secondary" onclick="adminDashboard.viewSessionsWithFeedback('${orgId}', this.parentElement.parentElement)">
+                                🔄 Try Again
+                            </button>
+                        </div>
+                    `;
+                    this.showMessage('Failed to load sessions. Please try again.', 'error');
+                    
+                } finally {
+                    // 8. RESTORE BUTTON
+                    buttonElement.innerHTML = originalHTML;
+                    buttonElement.disabled = false;
+                    buttonElement.style.opacity = '1';
+                }
+            }
+
+            // Simple optimized fetch with basic error handling
+            async optimizedFetch(url, options = {}) {
+                console.log(`📡 Fetching: ${url}`);
+                
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        headers: {
+                            'Cache-Control': 'no-cache',
+                            ...options.headers
+                        }
+                    });
+                    
+                    console.log(`✅ Fetch successful: ${url} (${response.status})`);
+                    return response;
+                } catch (error) {
+                    console.error(`❌ Fetch failed: ${url}`, error);
+                    throw error;
+                }
+            }
+
+
+            async loadSessions(orgId = null, forceRefresh = false, switchTab = true) {
                 const selectedOrgId = orgId || document.getElementById('orgSelect').value;
                 
                 if (!selectedOrgId) {
@@ -563,43 +1077,78 @@
                     return;
                 }
 
-                // Show loading indicator
+                // FAST CACHE CHECK FIRST - Immediate response for cached data
+                if (!forceRefresh && this.sessionsCache.has(selectedOrgId)) {
+                    console.log('⚡ INSTANT: Using cached sessions for:', selectedOrgId);
+                    const cachedSessions = this.sessionsCache.get(selectedOrgId);
+                    this.renderSessions(cachedSessions);
+                    
+                    if (orgId && switchTab) {
+                        window.switchTab('sessions');
+                        document.getElementById('orgSelect').value = orgId;
+                    }
+                    return; // EXIT IMMEDIATELY - No API call needed!
+                }
+
+                // Prevent multiple simultaneous calls
+                if (this.loadingSessions) {
+                    console.log('⏳ Sessions already loading, skipping duplicate call');
+                    return;
+                }
+                
+                this.loadingSessions = true;
                 const container = document.getElementById('sessionList');
-                container.innerHTML = '<p>⏳ Loading sessions...</p>';
+                const startTime = performance.now();
 
                 try {
-                    console.log('🔍 Loading sessions for organization:', selectedOrgId);
-                    const response = await fetch(`/api/sessions/${selectedOrgId}`);
+                    console.log('🔍 API CALL: Loading sessions for organization:', selectedOrgId);
                     
-                    console.log('📡 Response status:', response.status);
-                    console.log('📡 Response ok:', response.ok);
+                    const url = `/api/sessions/${selectedOrgId}`;
+                    
+                    // Use optimized fetch with timeout
+                    const response = await this.optimizedFetch(url, {
+                        signal: AbortSignal.timeout(10000) // 10 second timeout
+                    });
                     
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     
                     const sessions = await response.json();
-                    console.log('📋 Received sessions:', sessions);
+                    const loadTime = performance.now() - startTime;
+                    console.log(`⚡ API SUCCESS: Sessions loaded in ${loadTime.toFixed(2)}ms:`, sessions);
                     
+                    // Cache immediately for next time
+                    this.sessionsCache.set(selectedOrgId, sessions);
+                    
+                    // Render immediately
                     this.renderSessions(sessions);
                     
-                    if (orgId) {
-                        switchTab('sessions');
+                    if (orgId && switchTab) {
+                        window.switchTab('sessions');
                         document.getElementById('orgSelect').value = orgId;
                     }
+                    
                 } catch (error) {
-                    console.error('❌ Error loading sessions:', error);
-                    console.error('❌ Error details:', {
-                        message: error.message,
-                        stack: error.stack,
-                        selectedOrgId: selectedOrgId
-                    });
-                    container.innerHTML = '<p>❌ Failed to load sessions. Please try again.</p>';
-                    this.showMessage(`Failed to load sessions: ${error.message}`, 'error');
+                    const loadTime = performance.now() - startTime;
+                    
+                    if (error.name === 'AbortError') {
+                        console.error('⏱️ TIMEOUT: Session loading timed out after 10 seconds');
+                        container.innerHTML = '<p>⏱️ Request timed out. Please check your connection and try again.</p>';
+                        this.showMessage('Request timed out. Please try again.', 'error');
+                    } else {
+                        console.error(`❌ API ERROR: Failed after ${loadTime.toFixed(2)}ms:`, error);
+                        container.innerHTML = '<p>❌ Failed to load sessions. Please try again.</p>';
+                        this.showMessage(`Failed to load sessions: ${error.message}`, 'error');
+                    }
+                    
+                } finally {
+                    this.loadingSessions = false;
                 }
             }
 
             renderSessions(sessions) {
+                const startTime = performance.now();
                 const container = document.getElementById('sessionList');
                 
                 if (sessions.length === 0) {
@@ -607,7 +1156,24 @@
                     return;
                 }
 
-                container.innerHTML = sessions.map(session => this.renderSessionCard(session)).join('');
+                // Use DocumentFragment for better performance
+                const fragment = document.createDocumentFragment();
+                const tempDiv = document.createElement('div');
+                
+                // Build all HTML at once
+                tempDiv.innerHTML = sessions.map(session => this.renderSessionCard(session)).join('');
+                
+                // Move all children to fragment
+                while (tempDiv.firstChild) {
+                    fragment.appendChild(tempDiv.firstChild);
+                }
+                
+                // Single DOM update
+                container.innerHTML = '';
+                container.appendChild(fragment);
+                
+                const renderTime = performance.now() - startTime;
+                console.log(`🎨 Sessions rendered in ${renderTime.toFixed(2)}ms`);
             }
 
             renderSessionCard(session) {
@@ -634,7 +1200,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <strong>🔐 Enhanced Secure Voting URL:</strong><br>
+                                    <strong>🏆 Premium Voting URL:</strong><br>
                                     <div class="url-container">
                                         <a href="${window.location.origin}/secure-vote/${session.id}" target="_blank" class="voting-link">
                                             ${window.location.origin}/secure-vote/${session.id}
@@ -645,7 +1211,7 @@
                                     </div>
                                 </div>
                                 <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
-                                    💡 <strong>Tip:</strong> Use the secure URL for public voting, standard URL for internal voting
+                                    💡 <strong>Tip:</strong> Use the premium URL for public voting, standard URL for internal voting
                                 </div>
                             </div>
                         ` : ''}
@@ -747,8 +1313,9 @@
                 // Show loading state
                 const submitBtn = e.target.querySelector('button[type="submit"]');
                 const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'Creating Session...';
+                submitBtn.innerHTML = '⏳ Creating Session...';
                 submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.7';
 
                 try {
                     const response = await fetch('/api/sessions', {
@@ -777,8 +1344,9 @@
                     this.showMessage('Failed to create session', 'error');
                 } finally {
                     // Restore button state
-                    submitBtn.textContent = originalText;
+                    submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
                 }
             }
 
@@ -921,7 +1489,16 @@
                     
                     if (result.success) {
                         this.showMessage(`Session ${status} successfully!`, 'success');
-                        this.loadSessions(); // Refresh the session list
+                        
+                        // Clear cache to force fresh data load
+                        const orgSelect = document.getElementById('orgSelect');
+                        const selectedOrgId = orgSelect.value;
+                        if (selectedOrgId) {
+                            this.sessionsCache.delete(selectedOrgId);
+                        }
+                        
+                        // Force reload sessions to show updated URLs
+                        this.loadSessions(null, true); // Force refresh
                     } else {
                         this.showMessage(result.error, 'error');
                     }
@@ -931,11 +1508,26 @@
                 }
             }
 
+            // Performance monitoring
+            logPerformanceMetrics() {
+                const metrics = {
+                    cacheHits: this.sessionsCache.size,
+                    activeConnections: this.connectionPool.active,
+                    queuedRequests: this.requestQueue.size,
+                    memoryUsage: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) + 'MB' : 'N/A'
+                };
+                
+                console.log('📊 Performance Metrics:', metrics);
+                return metrics;
+            }
+
             showMessage(message, type) {
                 const container = document.getElementById('messageContainer');
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${type}`;
-                messageDiv.textContent = message;
+                
+                // Use innerHTML to support HTML content like spinners
+                messageDiv.innerHTML = message;
                 
                 container.appendChild(messageDiv);
                 
@@ -944,6 +1536,561 @@
                         messageDiv.parentNode.removeChild(messageDiv);
                     }
                 }, 5000);
+            }
+            
+            // ========================================
+            // AUTHENTICATION & USER MANAGEMENT METHODS
+            // ========================================
+            
+            async loadCurrentUser() {
+                try {
+                    const response = await fetch('/api/auth/me');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success) {
+                            this.currentUser = data.user;
+                            this.renderCurrentUserInfo(data.user);
+                            this.loadMFAStatus();
+                            return data.user;
+                        }
+                    }
+                    // Not authenticated, redirect to login
+                    window.location.href = '/login';
+                } catch (error) {
+                    console.error('Error loading current user:', error);
+                    window.location.href = '/login';
+                }
+            }
+            
+            renderCurrentUserInfo(user) {
+                const container = document.getElementById('currentUserInfo');
+                const roleColors = {
+                    super_admin: '#dc2626',
+                    org_admin: '#2563eb',
+                    voter: '#059669'
+                };
+                                
+                container.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 15px;">
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, ${roleColors[user.role] || '#6b7280'}, ${roleColors[user.role] || '#6b7280'}aa); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold;">
+                            ${user.username.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; color: #333;">${user.username}</h3>
+                            <p style="margin: 5px 0; color: #666;">${user.email}</p>
+                            <span style="background: ${roleColors[user.role] || '#6b7280'}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">
+                                ${user.role.replace('_', ' ')}
+                            </span>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; font-size: 0.9rem;">
+                        <div>
+                            <strong>Member Since:</strong><br>
+                            ${new Date(user.createdAt).toLocaleDateString()}
+                        </div>
+                        <div>
+                            <strong>Last Login:</strong><br>
+                            ${user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
+                        </div>
+                        <div>
+                            <strong>Email Status:</strong><br>
+                            ${user.isEmailVerified ? '✅ Verified' : '❌ Not Verified'}
+                        </div>
+                        <div>
+                            <strong>2FA Status:</strong><br>
+                            ${user.mfaEnabled ? '🔒 Enabled' : '🔓 Disabled'}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            async loadUsers() {
+                try {
+                    const response = await fetch('/api/admin/users');
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.users = data.users || [];
+                        this.renderUsers(this.users);
+                        this.updateUserStats();
+                    } else {
+                        this.showMessage('Failed to load users', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error loading users:', error);
+                    this.showMessage('Failed to load users', 'error');
+                }
+            }
+            
+            updateUserStats() {
+                if (!this.users) return;
+                                
+                const totalUsers = this.users.length;
+                const activeAdmins = this.users.filter(u => ['super_admin', 'org_admin'].includes(u.role)).length;
+                const verifiedUsers = this.users.filter(u => u.isEmailVerified).length;
+                const mfaUsers = this.users.filter(u => u.mfaEnabled).length;
+                                
+                document.getElementById('totalUsers').textContent = totalUsers;
+                document.getElementById('activeAdmins').textContent = activeAdmins;
+                document.getElementById('verifiedUsers').textContent = verifiedUsers;
+                document.getElementById('mfaUsers').textContent = mfaUsers;
+            }
+            
+            renderUsers(users) {
+                const container = document.getElementById('userList');
+                                
+                if (users.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #666;">
+                            <div style="font-size: 48px; margin-bottom: 20px;">👥</div>
+                            <h3>No Users Found</h3>
+                            <p>Start by adding users to your organization.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                                
+                container.innerHTML = users.map(user => this.renderUserCard(user)).join('');
+            }
+            
+            renderUserCard(user) {
+                const roleColors = {
+                    super_admin: '#dc2626',
+                    org_admin: '#2563eb', 
+                    voter: '#059669'
+                };
+                                
+                return `
+                    <div class="card" style="position: relative;">
+                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, ${roleColors[user.role] || '#6b7280'}, ${roleColors[user.role] || '#6b7280'}aa); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                ${user.username.charAt(0).toUpperCase()}
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0; color: #333;">${user.username}</h4>
+                                <p style="margin: 2px 0; color: #666; font-size: 0.9rem;">${user.email}</p>
+                                <div style="display: flex; gap: 10px; margin-top: 8px;">
+                                    <span style="background: ${roleColors[user.role] || '#6b7280'}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                                        ${user.role.replace('_', ' ').toUpperCase()}
+                                    </span>
+                                    ${user.isEmailVerified ? '<span style="color: #059669;">✅</span>' : '<span style="color: #dc2626;">❌</span>'}
+                                    ${user.mfaEnabled ? '<span style="color: #2563eb;">🔒</span>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; font-size: 0.8rem; color: #666; margin-bottom: 15px;">
+                            <div><strong>Created:</strong><br>${new Date(user.createdAt).toLocaleDateString()}</div>
+                            <div><strong>Last Login:</strong><br>${user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}</div>
+                            ${user.organizationId ? `<div><strong>Organization:</strong><br>Assigned</div>` : ''}
+                        </div>
+                                        
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button class="btn btn-secondary" onclick="adminDashboard.editUser('${user.id}')" style="padding: 8px 16px; font-size: 0.9rem;">
+                                ✏️ Edit
+                            </button>
+                            ${user.role !== 'super_admin' ? `
+                                <button class="btn btn-danger" onclick="adminDashboard.deleteUser('${user.id}', '${user.username}')" style="padding: 8px 16px; font-size: 0.9rem;">
+                                    🗑️ Delete
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            filterUsers() {
+                if (!this.users) return;
+                                
+                const searchTerm = document.getElementById('userSearchInput').value.toLowerCase();
+                const roleFilter = document.getElementById('roleFilter').value;
+                                
+                let filteredUsers = this.users.filter(user => {
+                    const matchesSearch = user.username.toLowerCase().includes(searchTerm) || 
+                                        user.email.toLowerCase().includes(searchTerm);
+                    const matchesRole = !roleFilter || user.role === roleFilter;
+                                    
+                    return matchesSearch && matchesRole;
+                });
+                                
+                this.renderUsers(filteredUsers);
+            }
+            
+            async loadMFAStatus() {
+                try {
+                    const container = document.getElementById('mfaSection');
+                                    
+                    if (this.currentUser && this.currentUser.mfaEnabled) {
+                        container.innerHTML = `
+                            <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                                <div style="color: #155724; font-weight: 600; margin-bottom: 10px;">🔒 Two-Factor Authentication is Enabled</div>
+                                <p style="color: #155724; margin: 0; font-size: 0.9rem;">Your account is protected with 2FA. Use your authenticator app to generate codes when logging in.</p>
+                            </div>
+                            <button class="btn btn-danger" onclick="adminDashboard.disableMFA()">
+                                🔓 Disable Two-Factor Authentication
+                            </button>
+                        `;
+                    } else {
+                        container.innerHTML = `
+                            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                                <div style="color: #856404; font-weight: 600; margin-bottom: 10px;">🔓 Two-Factor Authentication is Disabled</div>
+                                <p style="color: #856404; margin: 0; font-size: 0.9rem;">Enable 2FA to add an extra layer of security to your account.</p>
+                            </div>
+                            <button class="btn" onclick="adminDashboard.setupMFA()">
+                                🔒 Enable Two-Factor Authentication
+                            </button>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Error loading MFA status:', error);
+                }
+            }
+            
+            async setupMFA() {
+                try {
+                    const response = await fetch('/api/auth/mfa/setup', { method: 'POST' });
+                    const data = await response.json();
+                                    
+                    if (data.success) {
+                        const container = document.getElementById('mfaSection');
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: 20px;">
+                                <h4>Set Up Two-Factor Authentication</h4>
+                                <div style="margin: 20px 0;">
+                                    <p style="margin-bottom: 15px;">1. Scan this QR code with your authenticator app:</p>
+                                    <img src="${data.qrCode}" alt="QR Code" style="max-width: 200px; border: 1px solid #ddd; padding: 10px; border-radius: 8px; background: white;">
+                                </div>
+                                <div style="margin: 20px 0;">
+                                    <p style="margin-bottom: 10px;">2. Or manually enter this secret key:</p>
+                                    <code style="background: #f8f9fa; padding: 8px 12px; border-radius: 4px; font-family: monospace; word-break: break-all;">${data.manualEntryKey}</code>
+                                </div>
+                                <div style="margin: 20px 0;">
+                                    <p style="margin-bottom: 10px;">3. Enter the 6-digit verification code:</p>
+                                    <input type="text" id="mfaVerificationCode" placeholder="000000" maxlength="6" style="width: 120px; text-align: center; font-size: 1.2rem; margin-right: 10px;">
+                                    <button class="btn" onclick="adminDashboard.enableMFA()">
+                                        ✅ Verify & Enable
+                                    </button>
+                                </div>
+                                <button class="btn btn-secondary" onclick="adminDashboard.loadMFAStatus()">
+                                    ❌ Cancel
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        this.showMessage(data.error || 'Failed to setup MFA', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error setting up MFA:', error);
+                    this.showMessage('Failed to setup MFA', 'error');
+                }
+            }
+            
+            async enableMFA() {
+                try {
+                    const verificationCode = document.getElementById('mfaVerificationCode').value;
+                                    
+                    if (!verificationCode || verificationCode.length !== 6) {
+                        this.showMessage('Please enter a valid 6-digit code', 'error');
+                        return;
+                    }
+                                    
+                    const response = await fetch('/api/auth/mfa/enable', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ verificationCode })
+                    });
+                                    
+                    const data = await response.json();
+                                    
+                    if (data.success) {
+                        this.showMessage('Two-Factor Authentication enabled successfully!', 'success');
+                        this.currentUser.mfaEnabled = true;
+                        this.loadMFAStatus();
+                    } else {
+                        this.showMessage(data.error || 'Failed to enable MFA', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error enabling MFA:', error);
+                    this.showMessage('Failed to enable MFA', 'error');
+                }
+            }
+            
+            async disableMFA() {
+                const verificationCode = prompt('Enter your current 6-digit authentication code to disable 2FA:');
+                                
+                if (!verificationCode) return;
+                                
+                try {
+                    const response = await fetch('/api/auth/mfa/disable', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ verificationCode })
+                    });
+                                    
+                    const data = await response.json();
+                                    
+                    if (data.success) {
+                        this.showMessage('Two-Factor Authentication disabled', 'success');
+                        this.currentUser.mfaEnabled = false;
+                        this.loadMFAStatus();
+                    } else {
+                        this.showMessage(data.error || 'Failed to disable MFA', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error disabling MFA:', error);
+                    this.showMessage('Failed to disable MFA', 'error');
+                }
+            }
+            
+            async logoutAllSessions() {
+                if (!confirm('This will log you out from all devices. Continue?')) return;
+                                
+                try {
+                    const response = await fetch('/api/auth/logout', { method: 'POST' });
+                    if (response.ok) {
+                        window.location.href = '/login';
+                    } else {
+                        this.showMessage('Failed to logout', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error logging out:', error);
+                    this.showMessage('Failed to logout', 'error');
+                }
+            }
+            
+            // ========================================
+            // USER MANAGEMENT METHODS
+            // ========================================
+            
+            showAddUserModal() {
+                // Reset form
+                document.getElementById('userForm').reset();
+                document.getElementById('userModalTitle').textContent = 'Add User';
+                document.getElementById('userSubmitBtn').innerHTML = '👤 Create User';
+                
+                // Show/hide super admin option based on current user
+                if (this.currentUser && this.currentUser.role === 'super_admin') {
+                    document.getElementById('superAdminOption').style.display = 'block';
+                } else {
+                    document.getElementById('superAdminOption').style.display = 'none';
+                }
+                
+                // Load organizations for dropdown
+                this.loadOrganizationsForUserForm();
+                
+                // Setup role change handler
+                document.getElementById('userRole').onchange = () => this.handleUserRoleChange();
+                
+                // Setup form submission
+                document.getElementById('userForm').onsubmit = (e) => this.handleUserSubmit(e);
+                
+                document.getElementById('userModal').style.display = 'block';
+            }
+            
+            handleUserRoleChange() {
+                const role = document.getElementById('userRole').value;
+                const orgGroup = document.getElementById('userOrgGroup');
+                const orgSelect = document.getElementById('userOrganization');
+                
+                if (role === 'org_admin') {
+                    orgGroup.style.display = 'block';
+                    orgSelect.required = true;
+                } else {
+                    orgGroup.style.display = 'none';
+                    orgSelect.required = false;
+                }
+            }
+            
+            async loadOrganizationsForUserForm() {
+                try {
+                    const response = await fetch('/api/organizations');
+                    if (response.ok) {
+                        const organizations = await response.json();
+                        const select = document.getElementById('userOrganization');
+                        
+                        select.innerHTML = '<option value="">Select organization</option>' +
+                            organizations.map(org => `<option value="${org.id}">${org.name}</option>`).join('');
+                    }
+                } catch (error) {
+                    console.error('Error loading organizations for user form:', error);
+                }
+            }
+            
+            async handleUserSubmit(e) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('userSubmitBtn');
+                const originalText = submitBtn.innerHTML;
+                
+                // Show loading state
+                submitBtn.innerHTML = '⏳ Creating...';
+                submitBtn.disabled = true;
+                
+                try {
+                    const formData = {
+                        username: document.getElementById('userUsername').value,
+                        email: document.getElementById('userEmail').value,
+                        password: document.getElementById('userPassword').value,
+                        role: document.getElementById('userRole').value,
+                        organizationId: document.getElementById('userOrganization').value || null
+                    };
+                    
+                    const response = await fetch('/api/admin/users', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        this.showMessage('User created successfully! Verification email sent.', 'success');
+                        closeUserModal();
+                        this.loadUsers(); // Refresh user list
+                    } else {
+                        this.showMessage(result.error || 'Failed to create user', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error creating user:', error);
+                    this.showMessage('Failed to create user', 'error');
+                } finally {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            }
+            
+            editUser(userId) {
+                // Find user in current list
+                const user = this.users.find(u => u.id === userId);
+                if (!user) {
+                    this.showMessage('User not found', 'error');
+                    return;
+                }
+                
+                // Populate form with user data
+                document.getElementById('userUsername').value = user.username;
+                document.getElementById('userEmail').value = user.email;
+                document.getElementById('userRole').value = user.role;
+                
+                // Handle organization selection
+                if (user.organizationId) {
+                    document.getElementById('userOrganization').value = user.organizationId;
+                    document.getElementById('userOrgGroup').style.display = 'block';
+                }
+                
+                // Change modal title and button
+                document.getElementById('userModalTitle').textContent = 'Edit User';
+                document.getElementById('userSubmitBtn').innerHTML = '💾 Update User';
+                
+                // Hide password field for editing
+                const passwordField = document.getElementById('userPassword');
+                passwordField.style.display = 'none';
+                passwordField.required = false;
+                
+                // Setup form for editing
+                document.getElementById('userForm').onsubmit = (e) => this.handleUserUpdate(e, userId);
+                
+                document.getElementById('userModal').style.display = 'block';
+            }
+            
+            async handleUserUpdate(e, userId) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('userSubmitBtn');
+                const originalText = submitBtn.innerHTML;
+                
+                submitBtn.innerHTML = '⏳ Updating...';
+                submitBtn.disabled = true;
+                
+                try {
+                    const formData = {
+                        username: document.getElementById('userUsername').value,
+                        email: document.getElementById('userEmail').value
+                    };
+                    
+                    const response = await fetch(`/api/admin/users/${userId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        this.showMessage('User updated successfully!', 'success');
+                        closeUserModal();
+                        this.loadUsers();
+                    } else {
+                        this.showMessage(result.error || 'Failed to update user', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error updating user:', error);
+                    this.showMessage('Failed to update user', 'error');
+                } finally {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            }
+            
+            async deleteUser(userId, username) {
+                if (!confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/admin/users/${userId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        this.showMessage('User deleted successfully!', 'success');
+                        this.loadUsers();
+                    } else {
+                        this.showMessage(result.error || 'Failed to delete user', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    this.showMessage('Failed to delete user', 'error');
+                }
+            }
+            
+            async handlePasswordChange(e) {
+                e.preventDefault();
+                                
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+                                
+                if (newPassword !== confirmNewPassword) {
+                    this.showMessage('New passwords do not match', 'error');
+                    return;
+                }
+                                
+                if (newPassword.length < 6) {
+                    this.showMessage('New password must be at least 6 characters long', 'error');
+                    return;
+                }
+                                
+                try {
+                    const response = await fetch('/api/auth/change-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ currentPassword, newPassword })
+                    });
+                                    
+                    const data = await response.json();
+                                    
+                    if (response.ok && data.success) {
+                        this.showMessage('Password changed successfully!', 'success');
+                        document.getElementById('changePasswordForm').reset();
+                    } else {
+                        this.showMessage(data.error || 'Failed to change password', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error changing password:', error);
+                    this.showMessage('Failed to change password', 'error');
+                }
             }
 
             async copyToClipboard(text, button) {
@@ -1160,6 +2307,39 @@
             // Add active class to selected tab and content
             event.target.classList.add('active');
             document.getElementById(tabName).classList.add('active');
+            
+            // Special handling for specific tabs
+            if (tabName === 'sessions') {
+                // Check if we have organizations loaded and auto-select first one if none selected
+                const orgSelect = document.getElementById('orgSelect');
+                if (orgSelect && !orgSelect.value && orgSelect.children.length > 1) {
+                    const firstOrgId = orgSelect.children[1].value;
+                    if (firstOrgId) {
+                        orgSelect.value = firstOrgId;
+                        console.log('🔄 Auto-selecting first organization for sessions view');
+                        // Trigger session loading
+                        if (adminDashboard) {
+                            adminDashboard.loadSessions(firstOrgId);
+                        }
+                    }
+                } else if (orgSelect && orgSelect.value) {
+                    // Refresh sessions for currently selected org
+                    console.log('🔄 Refreshing sessions for current selection');
+                    if (adminDashboard) {
+                        adminDashboard.loadSessions(orgSelect.value);
+                    }
+                }
+            } else if (tabName === 'users') {
+                // Load users when accessing user management tab
+                if (adminDashboard) {
+                    adminDashboard.loadUsers();
+                }
+            } else if (tabName === 'authentication') {
+                // Load current user info and MFA status
+                if (adminDashboard) {
+                    adminDashboard.loadCurrentUser();
+                }
+            }
         }
 
         function switchCreateTab(tabType) {
@@ -1182,11 +2362,31 @@
         function closeModal() {
             document.getElementById('sessionModal').style.display = 'none';
         }
+        
+        function closeUserModal() {
+            document.getElementById('userModal').style.display = 'none';
+            // Reset form and show password field again
+            document.getElementById('userForm').reset();
+            document.getElementById('userPassword').style.display = 'block';
+            document.getElementById('userPassword').required = true;
+            document.getElementById('userOrgGroup').style.display = 'none';
+        }
 
         function loadSecurityAudit() {
             if (adminDashboard) {
                 adminDashboard.loadSecurityAudit();
             }
+        }
+
+        // Debounce function to prevent multiple rapid calls
+        let loadSessionsTimeout;
+        function debounceLoadSessions() {
+            clearTimeout(loadSessionsTimeout);
+            loadSessionsTimeout = setTimeout(() => {
+                if (adminDashboard) {
+                    adminDashboard.loadSessions();
+                }
+            }, 300); // 300ms delay
         }
 
         // Initialize dashboard
