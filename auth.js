@@ -122,11 +122,15 @@ class AuthenticationManager {
             .some(user => user.role === USER_ROLES.SUPER_ADMIN);
 
         if (!superAdminExists) {
+            // Use a strong password from env if provided, otherwise generate one
+            const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || crypto.randomBytes(9).toString('base64url');
+            const defaultUsername = process.env.DEFAULT_ADMIN_USERNAME || 'admin';
+
             const defaultAdmin = {
                 id: 'super-admin-' + Date.now(),
-                username: 'admin',
-                email: 'admin@votesphere.com',
-                password: await this.hashPassword('admin123'),
+                username: defaultUsername,
+                email: process.env.DEFAULT_ADMIN_EMAIL || 'admin@votesphere.com',
+                password: await this.hashPassword(defaultPassword),
                 role: USER_ROLES.SUPER_ADMIN,
                 organizationId: null,
                 isEmailVerified: true,
@@ -140,12 +144,15 @@ class AuthenticationManager {
 
             this.users.set(defaultAdmin.id, defaultAdmin);
             await this.saveData();
-            
+
+            console.log('============================================');
             console.log('✅ Default super admin created:');
-            console.log('   Username: admin');
-            console.log('   Password: admin123');
-            console.log('   Email: admin@votesphere.com');
-            console.log('   🔒 Please change these credentials immediately!');
+            console.log(`   Username: ${defaultUsername}`);
+            console.log(`   Password: ${defaultPassword}`);
+            console.log(`   Email: ${defaultAdmin.email}`);
+            console.log('   ⚠️  SECURITY ALERT: Change this password');
+            console.log('   immediately after first login!');
+            console.log('============================================');
         }
     }
 
