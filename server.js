@@ -433,7 +433,7 @@ app.use(session({
 }));
 
 // Serve the main admin dashboard (protected)
-app.get('/', authMiddleware.authenticate(), (req, res) => {
+app.get('/', authMiddleware.authenticate({ onFail: 'redirect', redirectTo: '/login' }), (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
 

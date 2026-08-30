@@ -23,7 +23,7 @@ class AuthMiddleware {
     }
 
     // Authenticate user middleware
-    authenticate() {
+    authenticate(options = {}) {
         return async (req, res, next) => {
             try {
                 const { sessionId, token } = this.extractSession(req);
@@ -51,6 +51,12 @@ class AuthMiddleware {
                 }
 
                 // No valid authentication found
+                // For browser page requests, redirect to login instead of returning JSON
+                if (options.onFail === 'redirect') {
+                    const redirectTo = options.redirectTo || '/login';
+                    return res.redirect(redirectTo);
+                }
+
                 return res.status(401).json({
                     error: 'Authentication required',
                     code: 'AUTH_REQUIRED'
