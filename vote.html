@@ -286,10 +286,11 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-webfont/dist/lucide-font.css">
 </head>
 <body>
     <div class="header">
-        <h1 id="sessionTitle">🗳️ Loading...</h1>
+        <h1 id="sessionTitle"><i class="lucide lucide-vote"></i> Loading...</h1>
         <p class="subtitle" id="sessionDescription">Please wait while we load the voting session</p>
     </div>
 
@@ -306,7 +307,7 @@
     <div id="messageContainer"></div>
     
     <div id="loadingMessage" class="loading">
-        🔄 Loading voting session...
+        <i class="lucide lucide-refresh-cw"></i> Loading voting session...
     </div>
     
     <div id="candidatesContainer" class="candidates-container" style="display: none;">
@@ -399,7 +400,7 @@
                     this.candidates = votingData.candidates;
                     
                     // Update page title and description
-                    document.getElementById('sessionTitle').textContent = `🗳️ ${this.sessionData.title}`;
+                    document.getElementById('sessionTitle').innerHTML = `<i class="lucide lucide-vote"></i> ${this.sessionData.title}`;
                     document.getElementById('sessionDescription').textContent = this.sessionData.description || 'Cast your vote and watch results update live!';
                     
                     this.renderCandidates();
@@ -497,7 +498,7 @@
                         <div class="vote-actions">
                             ${this.hasVoted ? (
                                 this.votedFor === candidate.id ? 
-                                    '<div class="voted-indicator">✓ Your Vote</div>' : 
+                                    '<div class="voted-indicator"><i class="lucide lucide-check"></i> Your Vote</div>' : 
                                     '<button class="vote-btn" disabled>Vote</button>'
                             ) : `<button class="vote-btn" onclick="votingInterface.vote('${candidate.id}')">Vote for ${candidate.name}</button>`}
                         </div>
@@ -538,14 +539,14 @@
                     this.votedFor = candidateId;
                     
                     const candidate = this.candidates.find(c => c.id === candidateId);
-                    this.showMessage(`✅ Vote recorded successfully for ${candidate ? candidate.name : 'candidate'}!`, 'success');
+                    this.showMessage(`<i class="lucide lucide-check-circle-2"></i> Vote recorded successfully for ${candidate ? candidate.name : 'candidate'}!`, 'success');
                     
                     // Re-render to show voted state
                     this.renderCandidates();
                     
                 } catch (error) {
                     console.error('Error voting:', error);
-                    this.showMessage(`❌ ${error.message}`, 'error');
+                    this.showMessage(`<i class="lucide lucide-x-circle"></i> ${error.message}`, 'error');
                 }
             }
 

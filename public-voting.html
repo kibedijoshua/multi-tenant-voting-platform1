@@ -203,11 +203,12 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-webfont/dist/lucide-font.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🗳️ Find Your Voting Session</h1>
+            <h1><i class="lucide lucide-vote"></i> Find Your Voting Session</h1>
             <p class="subtitle">Locate and participate in active voting sessions</p>
         </div>
 
@@ -215,7 +216,7 @@
             <div class="search-methods">
                 <!-- Method 1: Direct Session ID -->
                 <div class="method-card">
-                    <h3>🔗 Enter Session ID or URL</h3>
+                    <h3><i class="lucide lucide-link"></i> Enter Session ID or URL</h3>
                     <p style="color: #666; margin-bottom: 15px;">If you have a voting session ID or URL, enter it here:</p>
                     <form id="sessionIdForm">
                         <div class="form-group">
@@ -228,7 +229,7 @@
 
                 <!-- Method 2: Browse by Organization -->
                 <div class="method-card">
-                    <h3>🏢 Browse by Organization</h3>
+                    <h3><i class="lucide lucide-building-2"></i> Browse by Organization</h3>
                     <p style="color: #666; margin-bottom: 15px;">Find your organization and see active voting sessions:</p>
                     <div class="form-group">
                         <label for="orgSelect">Select Organization:</label>
@@ -367,7 +368,7 @@
                             <p><strong>Created:</strong> ${new Date(session.createdAt).toLocaleDateString()}</p>
                             
                             <a href="/vote/${session.id}" class="btn vote-button">
-                                🗳️ Vote in This Session
+                                <i class="lucide lucide-vote"></i> Vote in This Session
                             </a>
                         </div>
                     `).join('')}

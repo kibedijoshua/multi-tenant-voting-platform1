@@ -313,34 +313,35 @@
             font-size: 0.9rem;
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-webfont/dist/lucide-font.css">
 </head>
 <body>
     <div class="header">
-        <h1 id="sessionTitle">🔐 Enhanced Secure Voting</h1>
+        <h1 id="sessionTitle"><i class="lucide lucide-lock"></i> Enhanced Secure Voting</h1>
         <p class="subtitle" id="sessionDescription">Advanced security protection against fraud</p>
     </div>
 
     <div class="security-banner">
-        🛡️ Advanced Security Features Active
+        <i class="lucide lucide-shield"></i> Advanced Security Features Active
         <div class="security-features">
-            <div class="security-feature">✅ Rate Limiting</div>
-            <div class="security-feature">✅ IP Monitoring</div>
-            <div class="security-feature">✅ ML Fraud Detection</div>
-            <div class="security-feature">✅ CAPTCHA Protection</div>
-            <div class="security-feature">✅ Email Verification</div>
-            <div class="security-feature">✅ Browser Fingerprinting</div>
+            <div class="security-feature"><i class="lucide lucide-check-circle-2"></i> Rate Limiting</div>
+            <div class="security-feature"><i class="lucide lucide-check-circle-2"></i> IP Monitoring</div>
+            <div class="security-feature"><i class="lucide lucide-check-circle-2"></i> ML Fraud Detection</div>
+            <div class="security-feature"><i class="lucide lucide-check-circle-2"></i> CAPTCHA Protection</div>
+            <div class="security-feature"><i class="lucide lucide-check-circle-2"></i> Email Verification</div>
+            <div class="security-feature"><i class="lucide lucide-check-circle-2"></i> Browser Fingerprinting</div>
         </div>
     </div>
 
     <div id="fraudScoreDisplay" class="fraud-score" style="display: none;">
-        <h3>🔍 Security Analysis</h3>
+        <h3><i class="lucide lucide-search"></i> Security Analysis</h3>
         <div id="fraudScoreContent"></div>
     </div>
 
     <div id="messageContainer"></div>
     
     <div id="loadingMessage" class="loading">
-        🔄 Loading secure voting session...
+        <i class="lucide lucide-refresh-cw"></i> Loading secure voting session...
     </div>
     
     <div id="candidatesContainer" class="candidates-container" style="display: none;">
@@ -350,7 +351,7 @@
     <!-- Verification Modals -->
     <div id="captchaModal" class="verification-modal">
         <div class="modal-content">
-            <h3>🤖 Security Verification Required</h3>
+            <h3><i class="lucide lucide-robot"></i> Security Verification Required</h3>
             <p>Please solve this simple math problem to continue:</p>
             <div class="captcha-container">
                 <div id="captchaQuestion" class="captcha-question">Loading...</div>
@@ -367,7 +368,7 @@
 
     <div id="emailModal" class="verification-modal">
         <div class="modal-content">
-            <h3>📧 Email Verification Required</h3>
+            <h3><i class="lucide lucide-mail"></i> Email Verification Required</h3>
             <p>Please verify your email address to vote:</p>
             <div class="email-verification">
                 <div class="form-group">
@@ -448,7 +449,7 @@
                     this.sessionData = votingData.session;
                     this.candidates = votingData.candidates;
                     
-                    document.getElementById('sessionTitle').textContent = `🔐 ${this.sessionData.title}`;
+                    document.getElementById('sessionTitle').innerHTML = `<i class="lucide lucide-lock"></i> ${this.sessionData.title}`;
                     document.getElementById('sessionDescription').textContent = this.sessionData.description || 'Enhanced security protection against fraud';
                     
                     this.renderCandidates();
@@ -493,7 +494,7 @@
                     <div><strong>Fraud Score:</strong> ${(fraudData.score * 100).toFixed(1)}%</div>
                     <div style="margin-top: 10px; font-size: 0.9em;">
                         ${Object.entries(fraudData.factors).map(([key, value]) => 
-                            value ? `<div>⚠️ ${key.replace(/([A-Z])/g, ' $1').toLowerCase()}</div>` : ''
+                            value ? `<div><i class="lucide lucide-alert-triangle"></i> ${key.replace(/([A-Z])/g, ' $1').toLowerCase()}</div>` : ''
                         ).join('')}
                     </div>
                 `;
@@ -625,7 +626,7 @@
                     this.votedFor = this.currentVoteCandidate;
                     
                     const candidate = this.candidates.find(c => c.id === this.currentVoteCandidate);
-                    this.showMessage(`✅ Secure vote recorded for ${candidate.name}!`, 'success');
+                    this.showMessage(`<i class="lucide lucide-check-circle-2"></i> Secure vote recorded for ${candidate.name}!`, 'success');
                     
                     // Show security info
                     if (result.security) {
@@ -642,7 +643,7 @@
                     } else if (error.message.includes('Email verification')) {
                         this.showEmailModal();
                     } else {
-                        this.showMessage(`❌ ${error.message}`, 'error');
+                        this.showMessage(`<i class="lucide lucide-x-circle"></i> ${error.message}`, 'error');
                     }
                 }
             }
@@ -731,9 +732,9 @@
                         <div class="vote-actions">
                             ${this.hasVoted ? (
                                 this.votedFor === candidate.id ? 
-                                    '<div class="voted-indicator">✅ Your Secure Vote</div>' : 
+                                    '<div class="voted-indicator"><i class="lucide lucide-check-circle-2"></i> Your Secure Vote</div>' : 
                                     '<button class="vote-btn" disabled>Vote</button>'
-                            ) : `<button class="vote-btn" onclick="enhancedVoting.vote('${candidate.id}')">🔐 Secure Vote</button>`}
+                            ) : `<button class="vote-btn" onclick="enhancedVoting.vote('${candidate.id}')"><i class="lucide lucide-lock"></i> Secure Vote</button>`}
                         </div>
                     </div>
                 `).join('');
