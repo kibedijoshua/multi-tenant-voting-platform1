@@ -518,7 +518,7 @@ function recordVote(sessionId, candidateId, ip, userAgent, fingerprint) {
 // API Routes
 
 // Organization Management
-app.post('/api/organizations', async (req, res) => {
+app.post('/api/organizations', ...adminAuth, async (req, res) => {
     try {
         const { name, description, adminEmail } = req.body;
         
@@ -552,7 +552,7 @@ app.post('/api/organizations', async (req, res) => {
     }
 });
 
-app.get('/api/organizations', async (req, res) => {
+app.get('/api/organizations', ...adminAuth, async (req, res) => {
     try {
         const organizations = await DataManager.getOrganizations();
         res.json(organizations);
@@ -563,7 +563,7 @@ app.get('/api/organizations', async (req, res) => {
 });
 
 // Voting Session Management
-app.post('/api/sessions', async (req, res) => {
+app.post('/api/sessions', ...adminAuth, async (req, res) => {
     try {
         const { organizationId, title, description } = req.body;
         
@@ -600,7 +600,7 @@ app.post('/api/sessions', async (req, res) => {
     }
 });
 
-app.get('/api/sessions/:organizationId', async (req, res) => {
+app.get('/api/sessions/:organizationId', ...adminAuth, async (req, res) => {
     try {
         const { organizationId } = req.params;
         const sessions = await DataManager.getVotingSessions();
@@ -612,7 +612,7 @@ app.get('/api/sessions/:organizationId', async (req, res) => {
     }
 });
 
-app.get('/api/session/:sessionId', async (req, res) => {
+app.get('/api/session/:sessionId', ...adminAuth, async (req, res) => {
     try {
         const { sessionId } = req.params;
         const session = await DataManager.getSessionById(sessionId);
@@ -629,7 +629,7 @@ app.get('/api/session/:sessionId', async (req, res) => {
 });
 
 // Candidate Management
-app.post('/api/sessions/:sessionId/candidates', upload.single('photo'), async (req, res) => {
+app.post('/api/sessions/:sessionId/candidates', ...adminAuth, upload.single('photo'), async (req, res) => {
     try {
         const { sessionId } = req.params;
         const { name, description } = req.body;
@@ -664,7 +664,7 @@ app.post('/api/sessions/:sessionId/candidates', upload.single('photo'), async (r
     }
 });
 
-app.delete('/api/sessions/:sessionId/candidates/:candidateId', async (req, res) => {
+app.delete('/api/sessions/:sessionId/candidates/:candidateId', ...adminAuth, async (req, res) => {
     try {
         const { sessionId, candidateId } = req.params;
         
@@ -684,7 +684,7 @@ app.delete('/api/sessions/:sessionId/candidates/:candidateId', async (req, res) 
 });
 
 // Session Status Management
-app.patch('/api/sessions/:sessionId/status', async (req, res) => {
+app.patch('/api/sessions/:sessionId/status', ...adminAuth, async (req, res) => {
     try {
         const { sessionId } = req.params;
         const { status } = req.body;
@@ -1119,7 +1119,7 @@ app.get('/api/voting/:sessionId/vote-status', (req, res) => {
 });
 
 // Admin Security Monitoring Endpoints
-app.get('/api/security/suspicious-activity', (req, res) => {
+app.get('/api/security/suspicious-activity', ...adminAuth, (req, res) => {
     const activities = Array.from(suspiciousActivity.entries()).map(([ip, activities]) => ({
         ip,
         activities,
@@ -1134,7 +1134,7 @@ app.get('/api/security/suspicious-activity', (req, res) => {
     });
 });
 
-app.get('/api/security/ip-votes/:sessionId', (req, res) => {
+app.get('/api/security/ip-votes/:sessionId', ...adminAuth, (req, res) => {
     const { sessionId } = req.params;
     const ipVotes = Array.from(ipVoteCounts.entries())
         .filter(([key]) => key.startsWith(`${sessionId}-`))
@@ -1150,7 +1150,7 @@ app.get('/api/security/ip-votes/:sessionId', (req, res) => {
     });
 });
 
-app.get('/api/security/audit/:sessionId', async (req, res) => {
+app.get('/api/security/audit/:sessionId', ...adminAuth, async (req, res) => {
     const { sessionId } = req.params;
     
     // Get all votes for this session
@@ -1256,7 +1256,7 @@ app.post('/api/security/verify-email', (req, res) => {
 });
 
 // Get fraud score for IP/session
-app.get('/api/security/fraud-score/:sessionId/:ip', (req, res) => {
+app.get('/api/security/fraud-score/:sessionId/:ip', ...adminAuth, (req, res) => {
     const { sessionId, ip } = req.params;
     const fraudData = mlFraudScores.get(`${sessionId}-${ip}`);
     
