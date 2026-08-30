@@ -1,5 +1,4 @@
 const express = require('express');
-const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const fs = require('fs').promises;
@@ -459,70 +458,6 @@ app.get('/secure-vote/:sessionId', async (req, res) => {
         res.status(500).send('<h1>Server Error</h1><p>An error occurred while loading the voting page.</p>');
     }
 });
-
-// Initialize data file if it doesn't exist
-async function initializeData() {
-    try {
-        await fs.access(DATA_FILE);
-    } catch {
-        const initialData = {
-            candidates: [
-                {
-                    id: 1,
-                    name: "John Doe",
-                    description: "Experienced leader with a vision for progress",
-                    photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face&auto=format",
-                    votes: 0
-                },
-                {
-                    id: 2,
-                    name: "Jane Smith",
-                    description: "Innovative thinker focused on community development",
-                    photo: "https://images.unsplash.com/photo-1494790108755-2616b612b0e2?w=150&h=150&fit=crop&crop=face&auto=format",
-                    votes: 0
-                },
-                {
-                    id: 3,
-                    name: "Mike Johnson",
-                    description: "Dedicated public servant with proven track record",
-                    photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face&auto=format",
-                    votes: 0
-                }
-            ],
-            totalVotes: 0,
-            lastUpdated: new Date().toISOString()
-        };
-        await fs.writeFile(DATA_FILE, JSON.stringify(initialData, null, 2));
-        console.log('✅ Initialized voting data');
-    }
-}
-
-// Read vote data
-async function readVoteData() {
-    try {
-        const data = await fs.readFile(DATA_FILE, 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        console.error('Error reading vote data:', error);
-        throw error;
-    }
-}
-
-// Write vote data
-async function writeVoteData(data) {
-    try {
-        data.lastUpdated = new Date().toISOString();
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-    } catch (error) {
-        console.error('Error writing vote data:', error);
-        throw error;
-    }
-}
-
-// Generate session ID for new connections
-function generateSessionId() {
-    return uuidv4();
-}
 
 // Check if session has already voted
 function hasVoted(sessionId) {
