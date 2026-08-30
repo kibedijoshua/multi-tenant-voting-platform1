@@ -6,8 +6,13 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const multer = require('multer');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+
+const { AuthenticationManager, USER_ROLES } = require('./auth');
+const AuthMiddleware = require('./auth-middleware');
 
 const app = express();
 const server = http.createServer(app);
@@ -404,12 +409,42 @@ class DataManager {
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.static('.'));
 app.use('/uploads', express.static(UPLOADS_DIR));
 
-// Serve the main admin dashboard
-app.get('/', (req, res) => {
+// Authentication setup
+const authManager = new AuthenticationManager();
+const authMiddleware = new AuthMiddleware(authManager);
+
+// Combined middleware: authenticate then require admin role
+const adminAuth = [authMiddleware.authenticate(), authMiddleware.requireAdmin()];
+
+// Session middleware (used for CSRF / signed-in admin state)
+app.use(session({
+    secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'change-this-session-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
+// Serve the main admin dashboard (protected)
+app.get('/', authMiddleware.authenticate(), (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+// Serve login page
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'login.html'));
+});
+
+// Serve register page
+app.get('/register', (req, res) => {
+    res.sendFile(path.join(__dirname, 'register.html'));
 });
 
 // Serve public voting finder page
