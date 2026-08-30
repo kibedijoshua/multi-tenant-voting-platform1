@@ -705,7 +705,166 @@ app.patch('/api/sessions/:sessionId/status', async (req, res) => {
     }
 });
 
-// Voting Endpoints for Multi-Tenant System
+// ========================================
+// AUTHENTICATION & USER MANAGEMENT ROUTES
+// ========================================
+
+// Get current authenticated user
+app.get('/api/auth/me', authMiddleware.authenticate(), (req, res) => {
+    res.json({ success: true, user: req.user });
+});
+
+// Register a new user (org admin or voter)
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { username, email, password, role, organizationId } = req.body;
+
+        if (!username || !email || !password) {
+            return res.status(400).json({ error: 'Username, email, and password are required' });
+        }
+
+        const userData = {
+            username,
+            email,
+            password,
+            role: role || 'voter',
+            organizationId
+        };
+
+        const user = await authManager.registerUser(userData);
+
+        res.status(201).json({ success: true, user });
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(400).json({ error: error.message || 'Registration failed' });
+    }
+});
+
+// Login
+app.post('/api/auth/login', authMiddleware.loginRateLimit(), async (req, res) => {
+    try {
+        const { username, password, mfaCode } = req.body;
+
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username and password are required' });
+        }
+
+        const clientIp = req.ip || req.connection.remoteAddress;
+        const result = await authManager.loginUser({ username, password, mfaCode }, clientIp);
+
+        // Store session ID for stateless admin checks
+        res.cookie('sessionId', result.sessionId, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 24 * 60 * 60 * 1000
+        });
+        req.session.authSessionId = result.sessionId;
+
+        res.json({ success: true, ...result });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(401).json({ error: error.message || 'Login failed' });
+    }
+});
+
+// Logout
+app.post('/api/auth/logout', async (req, res) => {
+    try {
+        const { sessionId } = authMiddleware.extractSession(req);
+        if (sessionId) {
+            await authManager.logoutUser(sessionId);
+        }
+        res.clearCookie('sessionId');
+        if (req.session) {
+            req.session.destroy(() => {});
+        }
+        res.json({ success: true, message: 'Logged out successfully' });
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({ error: 'Failed to logout' });
+    }
+});
+
+// MFA setup - generate secret + QR code
+app.post('/api/auth/mfa/setup', authMiddleware.authenticate(), async (req, res) => {
+    try {
+        const result = await authManager.setupMFA(req.user.id);
+        res.json({ success: true, ...result });
+    } catch (error) {
+        console.error('MFA setup error:', error);
+        res.status(400).json({ error: error.message || 'MFA setup failed' });
+    }
+});
+
+// MFA enable - verify and enable
+app.post('/api/auth/mfa/enable', authMiddleware.authenticate(), async (req, res) => {
+    try {
+        const { verificationCode } = req.body;
+        if (!verificationCode) {
+            return res.status(400).json({ error: 'Verification code required' });
+        }
+        await authManager.enableMFA(req.user.id, verificationCode);
+        res.json({ success: true, message: 'Two-Factor Authentication enabled' });
+    } catch (error) {
+        console.error('MFA enable error:', error);
+        res.status(400).json({ error: error.message || 'Failed to enable MFA' });
+    }
+});
+
+// MFA disable
+app.post('/api/auth/mfa/disable', authMiddleware.authenticate(), async (req, res) => {
+    try {
+        const { verificationCode } = req.body;
+        if (!verificationCode) {
+            return res.status(400).json({ error: 'Verification code required' });
+        }
+        await authManager.disableMFA(req.user.id, verificationCode);
+        res.json({ success: true, message: 'Two-Factor Authentication disabled' });
+    } catch (error) {
+        console.error('MFA disable error:', error);
+        res.status(400).json({ error: error.message || 'Failed to disable MFA' });
+    }
+});
+
+// Change password
+app.post('/api/auth/change-password', authMiddleware.authenticate(), async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: 'Current and new password required' });
+        }
+        if (newPassword.length < 6) {
+            return res.status(400).json({ error: 'New password must be at least 6 characters long' });
+        }
+
+        const user = await authManager.getUserById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const fullUser = Array.from(authManager.users.values()).find(u => u.id === req.user.id);
+        if (!fullUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const isValidPassword = await authManager.comparePassword(currentPassword, fullUser.password);
+        if (!isValidPassword) {
+            return res.status(401).json({ error: 'Current password is incorrect' });
+        }
+
+        fullUser.password = await authManager.hashPassword(newPassword);
+        await authManager.saveData();
+
+        res.json({ success: true, message: 'Password changed successfully' });
+    } catch (error) {
+        console.error('Change password error:', error);
+        res.status(500).json({ error: error.message || 'Failed to change password' });
+    }
+});
+
+// ========================================
+// VOTING ENDPOINTS FOR MULTI-TENANT SYSTEM
+// ========================================
 
 // Get session data for voting interface
 app.get('/api/voting/:sessionId', async (req, res) => {
