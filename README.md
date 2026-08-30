@@ -85,47 +85,53 @@ Browser Client ↔ Frontend (HTML/CSS/JS) ↔ Express.js Server ↔ JSON File St
 
 3. **Access the Application**
    - Open your browser and go to: `http://localhost:3000`
-   - The voting interface will load automatically
+   - You'll be redirected to the login page automatically
+   - On first start, a default super admin is created (credentials printed to the console).
+     Set `DEFAULT_ADMIN_PASSWORD` in your environment to use your own password.
+   - Sign in to access the admin dashboard.
 
 ## 🗳️ How It Works
 
 ### User Flow
-1. User loads the webpage
-2. System generates a unique session ID (stored in sessionStorage)
-3. Frontend fetches initial candidate data via Socket.IO
-4. User clicks "Vote" for their preferred candidate
-5. System validates the vote and checks for duplicates
-6. Vote is stored and broadcast to all connected clients
-7. All users see updated vote counts in real-time
+1. Admin signs in at `/` (redirected to `/login` if not authenticated)
+2. Super admin creates organizations; org admins create voting sessions
+3. Sessions follow a Draft → Active → Completed workflow
+4. When active, a clickable voting URL (`/vote/{sessionId}`) is generated and shared
+5. Voters open the URL, review candidates, and cast a single vote
+6. Real-time vote counts update via Socket.IO for all connected clients
 
 ### API Endpoints
 
-- `GET /api/votes` - Fetch current voting data
-- `POST /api/vote` - Submit a vote
-- `GET /api/vote-status/:sessionId` - Check if session has voted
-- WebSocket events: `initialData`, `voteUpdate`
+**Authentication:**
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Login (supports MFA code)
+- `POST /api/auth/logout` - Logout
+- `GET /api/auth/me` - Get current user
+- `POST /api/auth/mfa/setup|enable|disable` - Two-factor authentication
+- `POST /api/auth/change-password` - Change password
+
+**Admin (requires auth):**
+- `GET/POST /api/organizations` - Manage organizations
+- `GET/POST /api/sessions` - Manage voting sessions
+- `POST/DELETE /api/sessions/:id/candidates` - Manage candidates
+- `PATCH /api/sessions/:id/status` - Change session status
+- `GET /api/security/*` - Security monitoring / audit
+
+**Public voting:**
+- `GET /api/voting/:sessionId` - Fetch current voting data
+- `POST /api/voting/:sessionId/vote` - Submit a vote
+- `GET /api/voting/:sessionId/vote-status` - Check if already voted
+- WebSocket events: `join-session`, `request-session-update`, `vote-update`
 
 ## 🔒 Security Features
 
-### One Vote Per User Implementation
-- **Primary**: Browser sessionStorage + server-side session tracking
-- **Session ID**: Unique identifier per browser session
-- **Server Validation**: Checks session status before accepting votes
-- **Backup**: IP address logging for audit purposes
-
-### Security Limitations & Trade-offs
-- ✅ Prevents casual duplicate voting
-- ✅ Simple to implement and understand
-- ⚠️ Can be bypassed by clearing browser data
-- ⚠️ Multiple users behind same NAT may be affected
-- ⚠️ Not suitable for high-stakes elections
-
-### Enhanced Security (Future Improvements)
-- Email/phone verification
-- JWT tokens with expiration
-- Database storage with user accounts
-- Rate limiting and CAPTCHA
-- Cryptographic vote validation
+- **Authentication**: JWT + session-based login, bcrypt password hashing, account lockout
+- **Multi-Factor Authentication**: TOTP (Google Authenticator) with QR code setup
+- **One Vote Per User**: Browser session + server-side session tracking + IP limiting
+- **CAPTCHA**: Math-based CAPTCHA for flagged IPs
+- **Email Verification**: Optional 6-digit code verification
+- **Fraud Detection**: ML-style scoring based on voting patterns
+- **Rate Limiting**: Per-IP limits on login and API endpoints
 
 ## 📊 Data Structure
 
@@ -222,12 +228,19 @@ nodemon server.js
 ## 📁 File Structure
 
 ```
-mybuprojects/
-├── index.html          # Frontend voting interface
-├── server.js           # Backend server with Socket.IO
-├── package.json        # Dependencies and scripts
-├── votes.json          # Vote data storage (auto-generated)
-└── README.md          # This documentation
+multi-tenant-voting-platform/
+├── server.js            # Backend server (Express + Socket.IO + auth routes)
+├── auth.js              # Authentication manager (register, login, MFA, password reset)
+├── auth-middleware.js    # Auth middleware (roles, rate limiting, CSRF, security headers)
+├── admin.html           # Admin dashboard (protected, requires login)
+├── login.html           # Login page
+├── register.html        # Registration page
+├── vote.html            # Voting interface
+├── enhanced-vote.html   # Enhanced secure voting interface
+├── public-voting.html   # Public voting finder
+├── package.json
+├── votes.json           # Auto-generated (legacy, unused)
+└── README.md
 ```
 
 ## 🔧 Customization
