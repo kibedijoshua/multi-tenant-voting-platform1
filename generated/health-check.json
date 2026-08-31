@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-08-31T18:20:11.138Z",
+  "date": "2026-08-31",
+  "node": "v24.19.0",
+  "uptimeSeconds": 0,
+  "users": {
+    "total": 1,
+    "superAdmins": 1,
+    "orgAdmins": 0,
+    "voters": 0
+  },
+  "auth": {
+    "activeSessions": 1,
+    "mfaEnabled": 0,
+    "verified": 1
+  },
+  "platform": {
+    "organizations": 1,
+    "votingSessions": 1,
+    "activeSessions": 1,
+    "totalVotes": 0
+  }
+}
