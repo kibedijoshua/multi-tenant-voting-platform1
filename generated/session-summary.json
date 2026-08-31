@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-08-31T18:20:11.138Z",
+  "date": "2026-08-31",
+  "sessions": [
+    {
+      "title": "president",
+      "id": "99b26f2c-99ba-4ad3-912d-13bb40c1cae5",
+      "status": "active",
+      "organizationId": "294a723d-94b2-45b2-a2a4-d527a3b37a57",
+      "totalVotes": 0,
+      "candidates": 0
+    }
+  ]
+}
