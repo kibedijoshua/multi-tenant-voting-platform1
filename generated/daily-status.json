@@ -1,11 +1,13 @@
 {
-  "generatedAt": "2026-08-31T18:09:51.108Z",
+  "generatedAt": "2026-08-31T18:20:11.138Z",
   "date": "2026-08-31",
   "node": "v24.19.0",
   "organizations": 1,
   "votingSessions": 1,
   "activeSessions": 1,
   "users": 1,
+  "authSessions": 1,
   "totalVotes": 0,
-  "totalCandidates": 0
+  "totalCandidates": 0,
+  "resetTokens": 0
 }
