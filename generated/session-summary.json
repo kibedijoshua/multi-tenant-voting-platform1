@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-03T15:00:03.551Z",
-  "date": "2026-09-03",
+  "generatedAt": "2026-09-04T21:53:55.792Z",
+  "date": "2026-09-04",
   "sessions": [
     {
-      "title": "president",
-      "id": "99b26f2c-99ba-4ad3-912d-13bb40c1cae5",
+      "title": "voting",
+      "id": "unknown",
       "status": "active",
-      "organizationId": "294a723d-94b2-45b2-a2a4-d527a3b37a57",
+      "organizationId": null,
       "totalVotes": 0,
       "candidates": 0
     }
